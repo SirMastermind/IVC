@@ -1,7 +1,7 @@
 clear all;
 close all;
 
-divider = sprintf('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+divider = sprintf('---------------');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%% Computations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -60,9 +60,30 @@ perimeters = bwperim(bw_final, 8); % bwperim(binary image, connectivity between 
 
 % Compute distance for each object to other
 
+% TODO
     
 % Compute differences between objects to find similarity
-    
+
+% TODO
+
+% Compute quadtree
+output_size = [power(2,nextpow2(size(image_gray, 1))), power(2,nextpow2(size(image_gray, 2)))]; % Output size must be power of 2
+S = qtdecomp(imresize(image_gray, output_size) , 0.27); % Resize it to the output size and decomposition in quadtree
+blocks = repmat(uint8(0),size(S)); % Get the blocks
+
+for dim = [512 256 128 64 32 16 8 4 2 1];    
+  numblocks = length(find(S==dim));    
+  if (numblocks > 0)        
+    values = repmat(uint8(1),[dim dim numblocks]);
+    values(2:dim,2:dim,:) = 0;
+    blocks = qtsetblk(blocks,S,dim,values);
+  end
+end
+
+blocks(end,1:end) = 1;
+blocks(1:end,end) = 1;
+
+blocks = imresize(blocks, [size(image_gray, 1), size(image_gray, 2)]); % Resize for the previous size
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Input and program's flow %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -82,7 +103,9 @@ while(true)
     disp('     4 - Show areas;');
     disp('     5 - Show distance between objects;');
     disp('     6 - Show similar objects;');
-    disp('     7 - Exit.');
+    disp('     7 - Show edges;');
+    disp('     8 - Show quadtree;');
+    disp('     9 - Exit.');
     disp(' ');
     option = input('Your option: ');
     disp(' ');
@@ -122,6 +145,14 @@ while(true)
             disp('Missing implementation');
             disp(divider);
         case 7
+            close all;
+            figure, imshow(edge(image_gray,'Prewitt'));
+            disp(divider);
+        case 8
+            close all;
+            figure, imshow(blocks,[]);
+            disp(divider);
+        case 9
             close all;
             disp('Googbye.');
             disp(divider);
