@@ -24,7 +24,7 @@ bw_final = imclose(bw,se);
 
 % Find and label the different regions
 [lb, num]= bwlabel(bw_final);
-% figure, imshow(mat2gray(lb));
+%figure, imshow(mat2gray(lb));
 
 % Get the area of each object
 stats = regionprops(lb);
@@ -74,13 +74,15 @@ while(true)
             close all;
             disp('Missing implementation')
         case 4
-            disp('Missing implementation')
+            close all;
+            figure, imshow(mat2gray(lb));
         case 5
             disp('Missing implementation')
         case 6
             close all;
             disp('Missing implementation')
         case 7
+            close all;
             disp('Googbye.');
             break;
     end
