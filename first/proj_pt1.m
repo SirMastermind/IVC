@@ -57,7 +57,7 @@ for k = 1 : length(objects) % For each object
 end
 
 bw_centroids = bw_final;
-for i = 1 : length(centroids) - 1
+for i = 1 : length(centroids)
     bw_centroids(uint16(centroids(i,1)), uint16(centroids(i,2))) = 0; % Mark the centroid with a black pixel
 end
 
@@ -172,8 +172,7 @@ while(true)
             but = 1;
             while (but == 1)
                 [ci,li,but] = ginput(1);
-                but;
-                if but == 1 % Add point
+                if but == 1 % Left click
                     N     = N+1;
                     cp(N) =  ci;
                     lp(N) =  li;
@@ -186,10 +185,32 @@ while(true)
                     break;
                 end
             end
-%             object_1 = lb(uint16(lp(1)),uint16(cp(1)));
-%             object_2 = [ lp(2) cp(2)];
+            object_1 = lb(uint16(lp(1)),uint16(cp(1)));
+            object_2 = lb(uint16(lp(2)),uint16(cp(2)));
+            centroid_1 = centroids(object_1, :);
+            centroid_2 = centroids(object_2, :);
+            distance_centroids = sqrt((centroid_1(1) - centroid_2(1))^2 + (centroid_1(2) - centroid_2(2))^2);
+    
+            x1 = centroid_1(1);
+            y1 = centroid_1(2);
+            str = ['Distance is ', num2str(uint16(distance_centroids))];
+            t = text(x1,y1,str);
+            s = t.Color;
+            t.Color = [1.0 0.0 0.0];
+            s = t.FontSize;
+            t.FontSize = 35;
             
+            N = 0;
+            but = 32;
+            while (but == 32)
+                [ci,li,but] = ginput(1);
+                if but == 32 % Right click
+                    break;
+                end
+            end
             
+            close;
+            clear cp lp;
             disp(divider);
         case 7
             close all;
