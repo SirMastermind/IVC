@@ -62,7 +62,7 @@ for i = 1 : length(centroids)
 end
 
 % Compute perimeter for each region
-perimeters = bwperim(bw_final, 8); % bwperim(binary image, connectivity between neighbors)
+perimeters8 = bwperim(bw_final, 8); % bwperim(binary image, connectivity between neighbors)
 
 % Compute distance for each object to other
 distance = zeros(size(centroids,1), size(centroids,1));
@@ -75,7 +75,35 @@ end
     
 % Compute differences between objects to find similarity
 
-% TODO
+perimeters4 = bwperim(bw_final, 4);
+labeled_perimeters8 = bwlabel(perimeters8 - perimeters4);
+labeled_perimeters4 = bwlabel(perimeters4);
+individual_perimeters = zeros(1,length(objects));
+for i = 1 : length(individual_perimeters)
+    count8s = 0;
+    count4s = 0;
+    for j = 1 : size(labeled_perimeters8,1)
+        for k = 1 : size(labeled_perimeters8,2)
+            if labeled_perimeters8(j,k) == i
+                count8s = count8s + 1;
+            end
+            if labeled_perimeters4(j,k) == i
+                count4s = count4s + 1;
+            end
+        end
+    end
+    individual_perimeters(i) = count4s + sqrt(2) * count8s;
+end
+
+individual_circularities = zeros(1,length(objects));
+for i = 1 : length(individual_circularities)
+    individual_circularities(i) = (individual_perimeters(i)^2) / objects(i);
+end
+                
+% perimeters4 = bwperim(bw_final,4);
+% perimeters = perimeters8 - perimeters4;
+% final_perimeters = sum(perimeters4) + sqrt(2)*sum(perimeters);
+
 
 % Compute quadtree
 output_size = [power(2,nextpow2(size(image_gray, 1))), power(2,nextpow2(size(image_gray, 2)))]; % Output size must be power of 2
@@ -159,7 +187,7 @@ while(true)
             disp(divider);
         case 4
             close all;
-            figure, imshow(perimeters); 
+            figure, imshow(perimeters8); 
             disp(divider);
         case 5
             close all;
