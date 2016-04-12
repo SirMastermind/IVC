@@ -15,6 +15,9 @@ disp(' ');
 
 % Load image
 image = imread('Moedas1.jpg');
+%image = imread('Moedas2.jpg');
+%image = imread('ring.png');
+%image = imread('cube.png');
 %imshow(image); title('Original');
 
 %Convert image to gray
@@ -57,7 +60,7 @@ for k = 1 : length(objects) % For each object
 end
 
 bw_centroids = bw_final;
-for i = 1 : length(centroids) - 1
+for i = 1 : size(centroids,1)
     bw_centroids(uint16(centroids(i,1)), uint16(centroids(i,2))) = 0; % Mark the centroid with a black pixel
 end
 
@@ -179,7 +182,7 @@ while(true)
             disp(divider);
         case 3
             close all;
-            for i = 1 : length(centroids) - 1
+            for i = 1 : size(centroids,1)
                 string = sprintf('Object %d has centroid in (%f, %f).', i, centroids(i,1), centroids(i,2));
                 disp(string);
             end
