@@ -1,7 +1,8 @@
 clear all;
 close all;
+warning off;
 
-divider = sprintf('--------------------');
+divider = sprintf('>------------------------------');
 
 disp('Welcome to the first project!');
 disp(' ');
@@ -90,9 +91,22 @@ blocks(1:end,end) = 1;
 
 blocks = imresize(blocks, [size(image_gray, 1), size(image_gray, 2)]); % Resize for the previous size
 
+% Compute derivative in y
+Hy = fspecial('sobel');
+imgdy = filter2(Hy,image(:,:,1));
+
+% Compute derivative in x
+Hx = fliplr(Hy');
+imgdx = filter2(Hx,image(:,:,1));
+
+% Compute module
+modG = sqrt(imgdy.^2 + imgdx.^2);
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Input and program's flow %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 disp('Image processed!');
 disp('This is the main menu.');
 disp(' ');
@@ -110,7 +124,12 @@ while(true)
     disp('     7 - Show similar objects;');
     disp('     8 - Show edges;');
     disp('     9 - Show quadtree;');
-    disp('     -1 - Exit.');
+    disp('     10 - Show derivative in x;');
+    disp('     11 - Show derivative in y;');
+    disp('     12 - Show module;');
+    disp('     13 - Show boundaries (unprocessed binary image);');
+    disp('     14 - Show boundaries (processed binary image);');
+    disp('     0 - Exit.');
     disp(' ');
     option = input('Your option: ');
     disp(' ');
@@ -194,7 +213,65 @@ while(true)
             close all;
             figure, imshow(blocks,[]);
             disp(divider);
-        case -1
+        case 10
+            close all;
+            figure, imshow(mat2gray(abs(imgdx)));
+            disp(divider);
+        case 11
+            close all;
+            figure, imshow(mat2gray(abs(imgdy)));
+            disp(divider);
+        case 12
+            close all;
+            figure, imshow(mat2gray(modG));
+            disp(divider);
+        case 13
+            close all;
+            % Compute boundaries
+            [B,L,N,A] = bwboundaries(bw);
+            figure; imshow(bw); hold on;
+
+            % Loop through object boundaries
+            for k = 1:N
+                % Boundary k is the parent of a hole if the k-th column
+                % of the adjacency matrix A contains a non-zero element
+                if (nnz(A(:,k)) > 0)
+                    boundary = B{k};
+                    plot(boundary(:,2),...
+                        boundary(:,1),'r','LineWidth',2);
+                    % Loop through the children of boundary k
+                    for l = find(A(:,k))'
+                        boundary = B{l};
+                        plot(boundary(:,2),...
+                            boundary(:,1),'g','LineWidth',2);
+                    end
+                end
+            end
+            disp(divider);
+        case 14
+            close all;
+            % Compute boundaries
+            [B,L,N,A] = bwboundaries(bw_final);
+            figure; imshow(bw_final); hold on;
+
+            % Loop through object boundaries
+            for k = 1:N
+                % Boundary k is the parent of a hole if the k-th column
+                % of the adjacency matrix A contains a non-zero element
+                if (nnz(A(:,k)) > 0)
+                    boundary = B{k};
+                    plot(boundary(:,2),...
+                        boundary(:,1),'r','LineWidth',2);
+                    % Loop through the children of boundary k
+                    for l = find(A(:,k))'
+                        boundary = B{l};
+                        plot(boundary(:,2),...
+                            boundary(:,1),'g','LineWidth',2);
+                    end
+                end
+            end
+            disp(divider);
+        case 0
             close all;
             disp('Googbye.');
             disp(divider);

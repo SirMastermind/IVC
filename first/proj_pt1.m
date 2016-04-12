@@ -1,7 +1,8 @@
 clear all;
 close all;
+warning off;
 
-divider = sprintf('--------------------');
+divider = sprintf('<----------------------------------------------->');
 
 disp('Welcome to the first project!');
 disp(' ');
@@ -13,7 +14,7 @@ disp(' ');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Load image
-image = imread('Moedas1.jpg');
+image = imread('cube.png');
 %imshow(image); title('Original');
 
 %Convert image to gray
@@ -56,7 +57,7 @@ for k = 1 : length(objects) % For each object
 end
 
 bw_centroids = bw_final;
-for i = 1 : length(centroids)
+for i = 1 : length(centroids) - 1
     bw_centroids(uint16(centroids(i,1)), uint16(centroids(i,2))) = 0; % Mark the centroid with a black pixel
 end
 
@@ -101,6 +102,7 @@ imgdx = filter2(Hx,image(:,:,1));
 % Compute module
 modG = sqrt(imgdy.^2 + imgdx.^2);
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Input and program's flow %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -125,6 +127,8 @@ while(true)
     disp('     10 - Show derivative in x;');
     disp('     11 - Show derivative in y;');
     disp('     12 - Show module;');
+    disp('     13 - Show boundaries (unprocessed binary image);');
+    disp('     14 - Show boundaries (processed binary image);');
     disp('     0 - Exit.');
     disp(' ');
     option = input('Your option: ');
@@ -142,7 +146,7 @@ while(true)
             disp(divider);
         case 3
             close all;
-            for i = 1 : length(centroids)
+            for i = 1 : length(centroids) - 1
                 string = sprintf('Object %d has centroid in (%f, %f).', i, centroids(i,1), centroids(i,2));
                 disp(string);
             end
@@ -220,6 +224,52 @@ while(true)
         case 12
             close all;
             figure, imshow(mat2gray(modG));
+            disp(divider);
+        case 13
+            close all;
+            % Compute boundaries
+            [B,L,N,A] = bwboundaries(bw);
+            figure; imshow(bw); hold on;
+
+            % Loop through object boundaries
+            for k = 1:N
+                % Boundary k is the parent of a hole if the k-th column
+                % of the adjacency matrix A contains a non-zero element
+                if (nnz(A(:,k)) > 0)
+                    boundary = B{k};
+                    plot(boundary(:,2),...
+                        boundary(:,1),'r','LineWidth',2);
+                    % Loop through the children of boundary k
+                    for l = find(A(:,k))'
+                        boundary = B{l};
+                        plot(boundary(:,2),...
+                            boundary(:,1),'g','LineWidth',2);
+                    end
+                end
+            end
+            disp(divider);
+        case 14
+            close all;
+            % Compute boundaries
+            [B,L,N,A] = bwboundaries(bw_final);
+            figure; imshow(bw_final); hold on;
+
+            % Loop through object boundaries
+            for k = 1:N
+                % Boundary k is the parent of a hole if the k-th column
+                % of the adjacency matrix A contains a non-zero element
+                if (nnz(A(:,k)) > 0)
+                    boundary = B{k};
+                    plot(boundary(:,2),...
+                        boundary(:,1),'r','LineWidth',2);
+                    % Loop through the children of boundary k
+                    for l = find(A(:,k))'
+                        boundary = B{l};
+                        plot(boundary(:,2),...
+                            boundary(:,1),'g','LineWidth',2);
+                    end
+                end
+            end
             disp(divider);
         case 0
             close all;
