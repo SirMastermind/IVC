@@ -14,9 +14,9 @@ disp(' ');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Load image
-image = imread('Moedas1.jpg');
+%image = imread('Moedas1.jpg');
 %image = imread('Moedas2.jpg');
-%image = imread('ring.png');
+image = imread('ring.png');
 %image = imread('cube.png');
 %imshow(image); title('Original');
 
@@ -76,16 +76,15 @@ for i = 1 : size(distance,1) % For each lines
     end
 end
     
-% Compute differences between objects to find similarity between
-% circularities
+% Compute differences between objects to find similarity between circularities
 
 perimeters4 = bwperim(bw_final, 4);
 labeled_perimeters8 = bwlabel(perimeters8 - perimeters4);
 labeled_perimeters4 = bwlabel(perimeters4);
-individual_perimeters = zeros(1,length(objects)); %Vector to save each object's perimeter
+individual_perimeters = zeros(1,length(objects)); % Vector to save each object's perimeter
 for i = 1 : length(individual_perimeters)
-    count8s = 0; %Counter perimeter8-perimeter4
-    count4s = 0; %Counter perimeter4
+    count8s = 0; % Counter perimeter8-perimeter4
+    count4s = 0; % Counter perimeter4
     for j = 1 : size(labeled_perimeters8,1)
         for k = 1 : size(labeled_perimeters8,2)
             if labeled_perimeters8(j,k) == i
@@ -96,18 +95,13 @@ for i = 1 : length(individual_perimeters)
             end
         end
     end
-    individual_perimeters(i) = count4s + sqrt(2) * count8s; %Calculate object-i's perimeter
+    individual_perimeters(i) = count4s + sqrt(2) * count8s; % Calculate object-i's perimeter
 end
 
 individual_circularities = zeros(1,length(objects));
 for i = 1 : length(individual_circularities)
-    individual_circularities(i) = (individual_perimeters(i)^2) / objects(i); %Calculate object-i's circularity
+    individual_circularities(i) = (individual_perimeters(i)^2) / objects(i); % Calculate object-i's circularity
 end
-                
-% perimeters4 = bwperim(bw_final,4);
-% perimeters = perimeters8 - perimeters4;
-% final_perimeters = sum(perimeters4) + sqrt(2)*sum(perimeters);
-
 
 % Compute quadtree
 output_size = [power(2,nextpow2(size(image_gray, 1))), power(2,nextpow2(size(image_gray, 2)))]; % Output size must be power of 2
@@ -383,7 +377,7 @@ while(true)
             disp(divider);
         case 0
             close all;
-            disp('Googbye.');
+            disp('Goodbye.');
             disp(divider);
             break;
         otherwise
