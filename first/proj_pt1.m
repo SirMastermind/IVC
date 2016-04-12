@@ -57,7 +57,7 @@ for k = 1 : length(objects) % For each object
 end
 
 bw_centroids = bw_final;
-for i = 1 : length(centroids)
+for i = 1 : length(centroids) - 1
     bw_centroids(uint16(centroids(i,1)), uint16(centroids(i,2))) = 0; % Mark the centroid with a black pixel
 end
 
