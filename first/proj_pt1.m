@@ -76,7 +76,8 @@ for i = 1 : size(distance,1) % For each lines
     end
 end
     
-% Compute differences between objects to find similarity
+% Compute differences between objects to find similarity between
+% circularities
 
 perimeters4 = bwperim(bw_final, 4);
 labeled_perimeters8 = bwlabel(perimeters8 - perimeters4);
@@ -245,8 +246,41 @@ while(true)
             disp(divider);
         case 7
             close all;
-            disp('Missing implementation');
-            disp(divider);
+            figure, imshow(bw_centroids), hold on;
+            N = 0;
+            but = 1;
+            [ci,li,but] = ginput(1);
+            if but == 1 % Left click
+                N     = N+1;
+                cp(N) =  ci;
+                lp(N) =  li;
+            end
+            
+            object_1 = lb(uint16(lp(1)),uint16(cp(1)));
+            circularity = individual_circularities(object_1);
+            
+            %Create a vector with the module diferences between the
+            %circularity of the chosen object and all the other objects
+            difs = zeros(1, length(individual_circularities)); 
+            for i=1 : length(difs)
+                difs(i) = abs(circularity - individual_circularities(i));
+            end
+            
+            %Sort the labels (indexes), from the most similiar to the less,
+            %and prints in the center of each object
+            [sorted, indexes] = sort(difs);
+            for i=1 : length(indexes)
+                disp(indexes(i));
+                x1 = centroids(indexes(i),2);
+                y1 = centroids(indexes(i),1);
+                str = [num2str(i)];
+                t = text(x1,y1,str);
+                s = t.Color;
+                t.Color = [1.0 0.0 0.0];
+                s = t.FontSize;
+                t.FontSize = 35;
+            end
+           
         case 8
             close all;
             while(true)
