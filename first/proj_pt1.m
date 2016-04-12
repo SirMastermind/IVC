@@ -6,7 +6,7 @@ divider = sprintf('<----------------------------------------------->');
 
 disp('Welcome to the first project!');
 disp(' ');
-disp('Starting processing your image...');
+disp('The program started processing your image...');
 disp(' ');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -14,7 +14,7 @@ disp(' ');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Load image
-image = imread('cube.png');
+image = imread('Moedas1.jpg');
 %imshow(image); title('Original');
 
 %Convert image to gray
@@ -65,8 +65,13 @@ end
 perimeters = bwperim(bw_final, 8); % bwperim(binary image, connectivity between neighbors)
 
 % Compute distance for each object to other
-
-% TODO
+distance = zeros(size(centroids,1), size(centroids,1));
+for i = 1 : size(distance,1) % For each lines
+    for j = 1 : size(distance,2) % For each column
+        distance(i,j) = sqrt((centroids(j,1) - centroids(i,1))^2 + (centroids(j,2) - centroids(i,2))^2); % Vector's length
+        distance(j,i) = sqrt((centroids(j,1) - centroids(i,1))^2 + (centroids(j,2) - centroids(i,2))^2); % Mirror
+    end
+end
     
 % Compute differences between objects to find similarity
 
@@ -108,8 +113,8 @@ modG = sqrt(imgdy.^2 + imgdx.^2);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 disp('Image processed!');
-disp('This is the main menu.');
 disp(' ');
+disp('This is the main menu.');
 
 while(true)
     % User interface
@@ -161,7 +166,30 @@ while(true)
             figure, imshow(mat2gray(lb));
             disp(divider);
         case 6
-            disp('Missing implementation');
+            close all;
+            figure, imshow(bw_centroids), hold on;
+            N = 0;
+            but = 1;
+            while (but == 1)
+                [ci,li,but] = ginput(1);
+                but;
+                if but == 1 % Add point
+                    N     = N+1;
+                    cp(N) =  ci;
+                    lp(N) =  li;
+                    plot(ci,li,'r.','MarkerSize',8); drawnow;
+                    if N > 1
+                        plot(cp(:),lp(:),'r.-','MarkerSize',8); drawnow;
+                    end
+                end
+                if size(cp,2) == 2
+                    break;
+                end
+            end
+%             object_1 = lb(uint16(lp(1)),uint16(cp(1)));
+%             object_2 = [ lp(2) cp(2)];
+            
+            
             disp(divider);
         case 7
             close all;
@@ -237,13 +265,11 @@ while(true)
                 % of the adjacency matrix A contains a non-zero element
                 if (nnz(A(:,k)) > 0)
                     boundary = B{k};
-                    plot(boundary(:,2),...
-                        boundary(:,1),'r','LineWidth',2);
+                    plot(boundary(:,2), boundary(:,1), 'r', 'LineWidth', 2);
                     % Loop through the children of boundary k
                     for l = find(A(:,k))'
                         boundary = B{l};
-                        plot(boundary(:,2),...
-                            boundary(:,1),'g','LineWidth',2);
+                        plot(boundary(:,2), boundary(:,1), 'g', 'LineWidth', 2);
                     end
                 end
             end
@@ -255,18 +281,16 @@ while(true)
             figure; imshow(bw_final); hold on;
 
             % Loop through object boundaries
-            for k = 1:N
+            for k = 1 : N
                 % Boundary k is the parent of a hole if the k-th column
                 % of the adjacency matrix A contains a non-zero element
                 if (nnz(A(:,k)) > 0)
                     boundary = B{k};
-                    plot(boundary(:,2),...
-                        boundary(:,1),'r','LineWidth',2);
+                    plot(boundary(:,2), boundary(:,1), 'r', 'LineWidth', 2);
                     % Loop through the children of boundary k
                     for l = find(A(:,k))'
                         boundary = B{l};
-                        plot(boundary(:,2),...
-                            boundary(:,1),'g','LineWidth',2);
+                        plot(boundary(:,2), boundary(:,1), 'g', 'LineWidth', 2);
                     end
                 end
             end
