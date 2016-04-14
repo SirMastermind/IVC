@@ -14,9 +14,9 @@ disp(' ');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Load image
-%image = imread('Moedas1.jpg');
+image = imread('Moedas1.jpg');
 %image = imread('Moedas2.jpg');
-image = imread('ring.png');
+%image = imread('ring.png');
 %image = imread('cube.png');
 %imshow(image); title('Original');
 
@@ -149,17 +149,21 @@ while(true)
     disp('     1 - Show original;');
     disp('     2 - Count objects;');
     disp('     3 - Show centroids;');
-    disp('     4 - Show perimeters;');
-    disp('     5 - Show areas;');
-    disp('     6 - Show distance between objects;');
-    disp('     7 - Show similar objects;');
-    disp('     8 - Show edges;');
-    disp('     9 - Show quadtree;');
-    disp('     10 - Show derivative in x;');
-    disp('     11 - Show derivative in y;');
-    disp('     12 - Show module;');
-    disp('     13 - Show boundaries (unprocessed binary image);');
-    disp('     14 - Show boundaries (processed binary image);');
+    disp('     4 - Show perimeters (original image);');
+    disp('     5 - Show perimeters (processed binary image);');
+    disp('     6 - Show areas;');
+    disp('     7 - Show distance between objects;');
+    disp('     8 - Show similar objects;');
+    disp('     9 - Show edges;');
+    disp('     10 - Show quadtree;');
+    disp('     11 - Show derivative in x;');
+    disp('     12 - Show derivative in y;');
+    disp('     13 - Show module;');
+    disp('     14 - Show boundaries (unprocessed binary image);');
+    disp('     15 - Show boundaries (processed binary image);');
+    disp('     16 - Show histogram RGB;');
+    disp('     17 - Show histogram grayscale;');
+    disp('     18 - See specific object from mask;');
     disp('     0 - Exit.');
     disp(' ');
     option = input('Your option: ');
@@ -187,11 +191,11 @@ while(true)
             close all;
             figure, imshow(perimeters8); 
             disp(divider);
-        case 5
+        case 6
             close all;
             figure, imshow(mat2gray(lb));
             disp(divider);
-        case 6
+        case 7
             close all;
             figure, imshow(bw_centroids), hold on;
             N = 0;
@@ -234,11 +238,10 @@ while(true)
                     break;
                 end
             end
-            
-            close;
+            close; % Closes picture
             clear cp lp;
             disp(divider);
-        case 7
+        case 8
             close all;
             figure, imshow(bw_centroids), hold on;
             N = 0;
@@ -275,7 +278,7 @@ while(true)
                 t.FontSize = 35;
             end
            
-        case 8
+        case 9
             close all;
             while(true)
                 disp(' ');
@@ -317,23 +320,23 @@ while(true)
                 end
             end
             disp(divider);
-        case 9
+        case 10
             close all;
             figure, imshow(blocks,[]);
             disp(divider);
-        case 10
+        case 11
             close all;
             figure, imshow(mat2gray(abs(imgdx)));
             disp(divider);
-        case 11
+        case 12
             close all;
             figure, imshow(mat2gray(abs(imgdy)));
             disp(divider);
-        case 12
+        case 13
             close all;
             figure, imshow(mat2gray(modG));
             disp(divider);
-        case 13
+        case 14
             close all;
             % Compute boundaries
             [B,L,N,A] = bwboundaries(bw);
@@ -354,7 +357,7 @@ while(true)
                 end
             end
             disp(divider);
-        case 14
+        case 15
             close all;
             % Compute boundaries
             [B,L,N,A] = bwboundaries(bw_final);
@@ -375,6 +378,19 @@ while(true)
                 end
             end
             disp(divider);
+        case 16
+            close all;
+            N = 100;
+            [nlin, ncol, dummy] = size(image);
+            npixels = nlin * ncol;
+            hr = imhist(image(:,:,1),N)/npixels;
+            hg = imhist(image(:,:,2),N)/npixels;
+            hb = imhist(image(:,:,3),N)/npixels;
+            H3 = [hr' hg' hb'];
+            figure, bar(H3);
+        case 17
+            close all;
+            figure, imhist(image_gray);
         case 0
             close all;
             disp('Goodbye.');
