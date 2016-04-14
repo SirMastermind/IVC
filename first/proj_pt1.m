@@ -149,8 +149,8 @@ while(true)
     disp('     1 - Show original;');
     disp('     2 - Count objects;');
     disp('     3 - Show centroids;');
-    disp('     4 - Show perimeters (original image);');
-    disp('     5 - Show perimeters (processed binary image);');
+    disp('     4 - Show perimeters (processed binary image);');
+    disp('     5 - Show perimeters (original image);');
     disp('     6 - Show areas by grayscale objects;');
     disp('     7 - Show areas by labels;');
     disp('     8 - Show distance between objects;');
@@ -195,7 +195,21 @@ while(true)
             disp(divider);
         case 5
             close all;
-            % Sil, paste here
+            figure, imshow(image);
+            hold on
+            x_perimeters = [];
+            y_perimeters = [];
+            for i = 1:size(perimeters8,1)
+                for j = 1:size(perimeters8,2)
+                    if perimeters8(i,j) == 1
+                        x_perimeters = [x_perimeters i];
+                        y_perimeters = [y_perimeters j];
+                    end
+                end
+            end
+            plot(y_perimeters, x_perimeters, 'r.', 'LineWidth', 5);
+            set(gca,'Color','None');
+            hold off
             disp(divider);
         case 6
             close all;
@@ -227,6 +241,7 @@ while(true)
             disp(divider);
         case 8
             close all;
+            disp('Click on two objects');
             figure, imshow(bw_final), hold on;
             N = 0;
             but = 1;
@@ -272,6 +287,7 @@ while(true)
             disp(divider);
         case 9
             close all;
+            disp('Click on an object to see which are the most similliar to it');
             figure, imshow(bw_final), hold on;
             N = 1;
             but = 1;
