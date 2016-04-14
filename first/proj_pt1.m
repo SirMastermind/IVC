@@ -151,19 +151,20 @@ while(true)
     disp('     3 - Show centroids;');
     disp('     4 - Show perimeters (original image);');
     disp('     5 - Show perimeters (processed binary image);');
-    disp('     6 - Show areas;');
-    disp('     7 - Show distance between objects;');
-    disp('     8 - Show similar objects;');
-    disp('     9 - Show edges;');
-    disp('     10 - Show quadtree;');
-    disp('     11 - Show derivative in x;');
-    disp('     12 - Show derivative in y;');
-    disp('     13 - Show module;');
-    disp('     14 - Show boundaries (unprocessed binary image);');
-    disp('     15 - Show boundaries (processed binary image);');
-    disp('     16 - Show histogram RGB;');
-    disp('     17 - Show histogram grayscale;');
-    disp('     18 - See specific object from mask;');
+    disp('     6 - Show areas by grayscale objects;');
+    disp('     7 - Show areas by labels;');
+    disp('     8 - Show distance between objects;');
+    disp('     9 - Show similar objects;');
+    disp('     10 - Show edges;');
+    disp('     11 - Show quadtree;');
+    disp('     12 - Show derivative in x;');
+    disp('     13 - Show derivative in y;');
+    disp('     14 - Show module;');
+    disp('     15 - Show boundaries (unprocessed binary image);');
+    disp('     16 - Show boundaries (processed binary image);');
+    disp('     17 - Show histogram RGB;');
+    disp('     18 - Show histogram grayscale;');
+    disp('     19 - See specific object from mask;');
     disp('     0 - Exit.');
     disp(' ');
     option = input('Your option: ');
@@ -176,6 +177,7 @@ while(true)
             figure, imshow(image);
             disp(divider);
         case 2
+            close all;
             string = sprintf('The number of objects in the image is %d.', length(objects));
             disp(string);
             disp(divider);
@@ -191,13 +193,41 @@ while(true)
             close all;
             figure, imshow(perimeters8); 
             disp(divider);
+        case 5
+            close all;
+            % Sil, paste here
+            disp(divider);
         case 6
             close all;
-            figure, imshow(mat2gray(lb));
+            figure, imshow(image_gray.*uint8(bw_final));
+            for i=1 : size(centroids, 1)
+                x1 = centroids(i,2);
+                y1 = centroids(i,1);
+                str = num2str(objects(i));
+                t = text(x1,y1,str);
+                s = t.Color;
+                t.Color = [1.0 0.0 0.0];
+                s = t.FontSize;
+                t.FontSize = 30;
+            end
             disp(divider);
         case 7
             close all;
-            figure, imshow(bw_centroids), hold on;
+            figure, imshow(mat2gray(lb));
+            for i=1 : size(centroids, 1)
+                x1 = centroids(i,2);
+                y1 = centroids(i,1);
+                str = num2str(objects(i));
+                t = text(x1,y1,str);
+                s = t.Color;
+                t.Color = [1.0 0.0 0.0];
+                s = t.FontSize;
+                t.FontSize = 30;
+            end
+            disp(divider);
+        case 8
+            close all;
+            figure, imshow(bw_final), hold on;
             N = 0;
             but = 1;
             while (but == 1)
@@ -230,7 +260,6 @@ while(true)
             s = t.FontSize;
             t.FontSize = 35;
             
-            N = 0;
             but = 32;
             while (but == 32)
                 [ci,li,but] = ginput(1);
@@ -241,14 +270,13 @@ while(true)
             close; % Closes picture
             clear cp lp;
             disp(divider);
-        case 8
+        case 9
             close all;
-            figure, imshow(bw_centroids), hold on;
-            N = 0;
+            figure, imshow(bw_final), hold on;
+            N = 1;
             but = 1;
             [ci,li,but] = ginput(1);
             if but == 1 % Left click
-                N     = N+1;
                 cp(N) =  ci;
                 lp(N) =  li;
             end
@@ -267,7 +295,6 @@ while(true)
             %and prints in the center of each object
             [sorted, indexes] = sort(difs);
             for i=1 : length(indexes)
-                disp(indexes(i));
                 x1 = centroids(indexes(i),2);
                 y1 = centroids(indexes(i),1);
                 str = [num2str(i)];
@@ -278,7 +305,7 @@ while(true)
                 t.FontSize = 35;
             end
            
-        case 9
+        case 10
             close all;
             while(true)
                 disp(' ');
@@ -320,23 +347,23 @@ while(true)
                 end
             end
             disp(divider);
-        case 10
+        case 11
             close all;
             figure, imshow(blocks,[]);
             disp(divider);
-        case 11
+        case 12
             close all;
             figure, imshow(mat2gray(abs(imgdx)));
             disp(divider);
-        case 12
+        case 13
             close all;
             figure, imshow(mat2gray(abs(imgdy)));
             disp(divider);
-        case 13
+        case 14
             close all;
             figure, imshow(mat2gray(modG));
             disp(divider);
-        case 14
+        case 15
             close all;
             % Compute boundaries
             [B,L,N,A] = bwboundaries(bw);
@@ -357,12 +384,11 @@ while(true)
                 end
             end
             disp(divider);
-        case 15
+        case 16
             close all;
             % Compute boundaries
             [B,L,N,A] = bwboundaries(bw_final);
             figure; imshow(bw_final); hold on;
-
             % Loop through object boundaries
             for k = 1 : N
                 % Boundary k is the parent of a hole if the k-th column
@@ -378,19 +404,38 @@ while(true)
                 end
             end
             disp(divider);
-        case 16
-            close all;
-            N = 100;
-            [nlin, ncol, dummy] = size(image);
-            npixels = nlin * ncol;
-            hr = imhist(image(:,:,1),N)/npixels;
-            hg = imhist(image(:,:,2),N)/npixels;
-            hb = imhist(image(:,:,3),N)/npixels;
-            H3 = [hr' hg' hb'];
-            figure, bar(H3);
         case 17
+            close all;            
+            R = imhist(image(:,:,1));
+            G = imhist(image(:,:,2));
+            B = imhist(image(:,:,3));
+            figure;
+            plot(R,'r');
+            hold on;
+            plot(G,'g');
+            plot(B,'b');
+            legend('Red channel','Green channel','Blue channel');
+            hold off;
+            disp(divider);
+        case 18
             close all;
             figure, imhist(image_gray);
+            disp(divider);
+        case 19
+            close all;
+            disp('Click on an area to see the object behind it.');
+            figure, imshow(bw_final), hold on;
+            N = 1;
+            but = 1;
+            [ci,li,but] = ginput(1);
+            if but == 1 % Left click
+                cp(N) =  ci;
+                lp(N) =  li;
+            end
+            object_to_find = lb(uint16(lp(1)),uint16(cp(1))); % Get the label
+            image_object = (lb == object_to_find); % Get only the mask for the object of interest
+            figure, imshow(image_gray.*uint8(image_object)); % And operation
+            disp(divider);
         case 0
             close all;
             disp('Goodbye.');
