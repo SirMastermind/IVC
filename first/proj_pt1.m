@@ -77,13 +77,12 @@ for i = 1 : size(distance,1) % For each lines
 end
     
 % Compute differences between objects to find similarity between circularities
-
 perimeters4 = bwperim(bw_final, 4);
 labeled_perimeters8 = bwlabel(perimeters8 - perimeters4);
 labeled_perimeters4 = bwlabel(perimeters4);
 individual_perimeters = zeros(1,length(objects)); % Vector to save each object's perimeter
 for i = 1 : length(individual_perimeters)
-    count8s = 0; % Counter perimeter8-perimeter4
+    count8s = 0; % Counter perimeter8 - perimeter4
     count4s = 0; % Counter perimeter4
     for j = 1 : size(labeled_perimeters8,1)
         for k = 1 : size(labeled_perimeters8,2)
@@ -187,7 +186,15 @@ while(true)
                 string = sprintf('Object %d has centroid in (%f, %f).', i, centroids(i,1), centroids(i,2));
                 disp(string);
             end
-            figure, imshow(bw_centroids);
+            figure, imshow(image_gray);
+            hold on;
+            x_plot = [];
+            y_plot = [];
+            for i = 1 : length(centroids)
+                x_plot = [ x_plot centroids(i, 1) ];
+                y_plot = [ y_plot centroids(i, 2) ];
+            end
+            plot(y_plot, x_plot, 'r.', 'MarkerSize', 30);
             disp(divider);
         case 4
             close all;
@@ -241,7 +248,7 @@ while(true)
             disp(divider);
         case 8
             close all;
-            disp('Click on two objects');
+            disp('Click on two objects.');
             figure, imshow(bw_final), hold on;
             N = 0;
             but = 1;
@@ -275,6 +282,7 @@ while(true)
             s = t.FontSize;
             t.FontSize = 35;
             
+            disp('Right click to close the image.');
             but = 32;
             while (but == 32)
                 [ci,li,but] = ginput(1);
