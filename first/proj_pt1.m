@@ -145,7 +145,7 @@ while(true)
     % User interface
     disp(' ');
     disp('Please, input your option:');
-    disp('     1 - Show original;');
+    disp('     1 - Show objects;');
     disp('     2 - Count objects;');
     disp('     3 - Show centroids;');
     disp('     4 - Show perimeters (processed binary image);');
@@ -173,7 +173,7 @@ while(true)
     switch option
         case 1
             close all;
-            figure, imshow(image);
+            figure, imshow(image_gray.*uint8(bw_final));
             disp(divider);
         case 2
             close all;
