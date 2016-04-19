@@ -80,12 +80,16 @@ end
 perimeters4 = bwperim(bw_final, 4);
 labeled_perimeters8 = bwlabel(perimeters8 - perimeters4);
 labeled_perimeters4 = bwlabel(perimeters4);
+individual_circularities2 = zeros(1, length(objects));
 individual_perimeters = zeros(1,length(objects)); % Vector to save each object's perimeter
 for i = 1 : length(individual_perimeters)
     count8s = 0; % Counter perimeter8 - perimeter4
     count4s = 0; % Counter perimeter4
+    radius_mean = 0; %Counter for radius_mean
+    radius_var = 0; %Counter for radius_var
     for j = 1 : size(labeled_perimeters8,1)
         for k = 1 : size(labeled_perimeters8,2)
+            radius_mean = radius_mean + norm([j-centroids(i,1) k-centroids(i,2)]); %Sum part of the radius mean calculus
             if labeled_perimeters8(j,k) == i
                 count8s = count8s + 1;
             end
@@ -94,6 +98,17 @@ for i = 1 : length(individual_perimeters)
             end
         end
     end
+    
+    radius_mean = (1/(j*k)) * radius_mean; %Final calculus of radius mean
+    
+    %New iteration to calculate radius variation
+    for j = 1 : size(labeled_perimeters8,1)
+        for k = 1 : size(labeled_perimeters8,2)
+            radius_var = radius_var + (norm([j-centroids(i,1) k-centroids(i,2)]) - radius_mean)^2; %Sum part of the radius variation calculus
+        end
+    end
+    radius_var = sqrt((1/(j*k)) * radius_var); %Final calculus of radius variation
+    individual_circularities2(i) = radius_mean / radius_var;
     individual_perimeters(i) = count4s + sqrt(2) * count8s; % Calculate object-i's perimeter
 end
 
@@ -328,6 +343,42 @@ while(true)
                 s = t.FontSize;
                 t.FontSize = 35;
             end
+            
+%             For Circularities-2
+%             close all;
+%             disp('Click on an object to see which are the most similliar to it');
+%             figure, imshow(bw_final), hold on;
+%             N = 1;
+%             but = 1;
+%             [ci,li,but] = ginput(1);
+%             if but == 1 % Left click
+%                 cp(N) =  ci;
+%                 lp(N) =  li;
+%             end
+%             
+%             object_1 = lb(uint16(lp(1)),uint16(cp(1)));
+%             circularity = individual_circularities2(object_1);
+%             
+%             %Create a vector with the module diferences between the
+%             %circularity of the chosen object and all the other objects
+%             difs = zeros(1, length(individual_circularities2)); 
+%             for i=1 : length(difs)
+%                 difs(i) = abs(circularity - individual_circularities2(i));
+%             end
+%             
+%             %Sort the labels (indexes), from the most similiar to the less,
+%             %and prints in the center of each object
+%             [sorted, indexes] = sort(difs);
+%             for i=1 : length(indexes)
+%                 x1 = centroids(indexes(i),2);
+%                 y1 = centroids(indexes(i),1);
+%                 str = [num2str(i)];
+%                 t = text(x1,y1,str);
+%                 s = t.Color;
+%                 t.Color = [1.0 0.0 0.0];
+%                 s = t.FontSize;
+%                 t.FontSize = 35;
+%             end
            
         case 10
             close all;
