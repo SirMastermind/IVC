@@ -6,6 +6,56 @@ divider = sprintf('<----------------------------------------------->');
 
 disp('Welcome to the first project!');
 disp(' ');
+
+while(true)
+    disp(' ');
+    disp('Please, choose a picture:');
+    disp('     1 - Moedas1.jpg;');
+    disp('     2 - Moedas2.jpg;');
+    disp('     3 - Moedas3.jpg;');
+    disp('     4 - Moedas4.jpg;');
+    disp('     5 - Moedas5.jpg;');
+    disp('     6 - Moedas6.jpg;');
+    disp('     7 - cube.png;');
+    disp('     8 - ring.png;');
+    disp('     0 - Exit Matlab.');
+    disp(' ');
+    option = input('Your choice: ');
+    disp(' ');
+    switch option
+        case 1
+            image = imread('Moedas1.jpg');
+            break;
+        case 2
+            image = imread('Moedas2.jpg');
+            break;
+        case 3
+            image = imread('Moedas3.jpg');
+            break;
+        case 4
+            image = imread('Moedas4.jpg');
+            break;
+        case 5
+            image = imread('Moedas5.jpg');
+            break;
+        case 6
+            image = imread('Moedas6.jpg');
+            break;
+        case 7
+            image = imread('cube.png');
+            break;
+        case 8
+            image = imread('ring.png');
+            break;
+        case 0
+            exit;
+        otherwise
+            disp('Please, insert a valid image.');
+    disp(divider);
+    end
+end
+  
+disp(' ');
 disp('The program started processing your image...');
 disp(' ');
 
@@ -15,13 +65,6 @@ tic;
 %%%%%%%%%%%%%%%%%%%%%%%%%% Computations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Load image
-image = imread('Moedas1.jpg');
-%image = imread('Moedas2.jpg');
-%image = imread('ring.png');
-%image = imread('cube.png');
-%imshow(image); title('Original');
-
 %Convert image to gray
 image_gray = rgb2gray(image);
 
@@ -30,9 +73,13 @@ bw = im2bw(image_gray, graythresh(image_gray));
 %figure,imshow(bw);
 
 % Use closure to get the shapes well defined
-se = strel('disk', 15);
+se = strel('disk', 3);
 bw_final = imclose(bw,se);
-bw_final = imopen(bw_final,se);
+bw_final = bwmorph(bw_final,'hbreak'); % Removes H-connected pixels.
+bw_final = bwmorph(bw_final,'spur'); % Removes spur pixels.
+bw_final = bwmorph(bw_final,'clean'); % Removes isolated pixels (individual 1s that are surrounded by 0s).
+bw_final = bwmorph(bw_final,'remove'); % Removes interior pixels.
+bw_final = imfill(bw_final,'holes'); % Fills the regions.
 %figure,imshow(bw_final);
 
 % Find and label the different regions
@@ -196,6 +243,8 @@ while(true)
     disp('     20 - Hough transform;');
     disp('     21 - Limited theta range Hough transform;');
     disp('     22 - Show gradient magnitude and direction;');
+    disp('     23 - Show skeleton of the unprocessed binary image;');
+    disp('     24 - Show skeleton of the processed binary image;');
     disp('     0 - Exit.');
     disp(' ');
     option = input('Your option: ');
@@ -216,7 +265,7 @@ while(true)
         case 3
             close all;
             for i = 1 : size(centroids,1)
-                string = sprintf('Object %d has centroid in (%f, %f).', i, centroids(i,1), centroids(i,2));
+                string = sprintf('Object %d has centroid in (%0.2f, %0.2f).', i, centroids(i,1), centroids(i,2));
                 disp(string);
             end
             figure, imshow(image_gray);
@@ -594,10 +643,17 @@ while(true)
             title('Gradient magnitude and gradient direction using Sobel method')
             axis off;
             disp(divider);
+        case 23
+            close all;
+            figure, imshow(bwmorph(bw,'skel',Inf));
+            title('Skeleton of the unprocessed binary image.');
+        case 24
+            close all;
+            figure, imshow(bwmorph(bw_final,'skel',Inf));
+            title('Skeleton of the processed binary image.');
         case 0
             close all;
             disp('Goodbye.');
-            disp(divider);
             break;
         otherwise
             disp('Please, insert a valid option.');
