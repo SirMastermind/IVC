@@ -9,6 +9,8 @@ disp(' ');
 disp('The program started processing your image...');
 disp(' ');
 
+tic;
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%% Computations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -154,11 +156,17 @@ hough_image = edge(image_gray, 'canny');
 % Limited theta range Hough transform
 [H_h,T_h,R_h] = hough(image_gray, 'Theta', 44:0.5:46);
 
+% Gradient magnitude and gradient direction
+[Gmag, Gdir] = imgradient(image_gray,'sobel');
+
+time = toc; % To measure the time it took to process the image
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Input and program's flow %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 disp('Image processed!');
+disp(sprintf('It took %.2f seconds.', time));
 disp(' ');
 disp('This is the main menu.');
 
@@ -187,7 +195,7 @@ while(true)
     disp('     19 - See specific object from mask;');
     disp('     20 - Hough transform;');
     disp('     21 - Limited theta range Hough transform;');
-    disp('     22 - Detect lines using Hough transform;');
+    disp('     22 - Show gradient magnitude and direction;');
     disp('     0 - Exit.');
     disp(' ');
     option = input('Your option: ');
@@ -198,6 +206,7 @@ while(true)
         case 1
             close all;
             figure, imshow(image_gray.*uint8(bw_final));
+            title('Objects detected');
             disp(divider);
         case 2
             close all;
@@ -211,6 +220,7 @@ while(true)
                 disp(string);
             end
             figure, imshow(image_gray);
+            title('Centroids of the objects');
             hold on;
             x_plot = [];
             y_plot = [];
@@ -223,10 +233,12 @@ while(true)
         case 4
             close all;
             figure, imshow(perimeters8); 
+            title('Perimeters of the objects in binary image');
             disp(divider);
         case 5
             close all;
             figure, imshow(image);
+            title('Perimeters of the objects in original image');
             hold on
             x_perimeters = [];
             y_perimeters = [];
@@ -245,6 +257,7 @@ while(true)
         case 6
             close all;
             figure, imshow(image_gray.*uint8(bw_final));
+            title('Area occupied by the objects');
             for i=1 : size(centroids, 1)
                 x1 = centroids(i,2);
                 y1 = centroids(i,1);
@@ -259,6 +272,7 @@ while(true)
         case 7
             close all;
             figure, imshow(mat2gray(lb));
+            title('Areas with different colors by labels ');
             for i=1 : size(centroids, 1)
                 x1 = centroids(i,2);
                 y1 = centroids(i,1);
@@ -274,6 +288,7 @@ while(true)
             close all;
             disp('Click on two objects.');
             figure, imshow(bw_final), hold on;
+            title('Distance between centroids');
             N = 0;
             but = 1;
             while (but == 1)
@@ -331,6 +346,7 @@ while(true)
                         close all;
                         disp('Click on an object to see which are the most similiar to it');
                         figure, imshow(bw_final), hold on;
+                        title('Similarity using circularity 1');
                         N = 1;
                         but = 1;
                         [ci,li,but] = ginput(1);
@@ -364,8 +380,9 @@ while(true)
                         end
                     case 2
                         close all;
-                        disp('Click on an object to see which are the most similliar to it');
+                        disp('Click on an object to see which are the most similiar to it');
                         figure, imshow(bw_final), hold on;
+                        title('Similarity using circularity 2');
                         N = 1;
                         but = 1;
                         [ci,li,but] = ginput(1);
@@ -423,21 +440,27 @@ while(true)
                     case 1
                         close all;
                         figure, imshow(edge(image_gray,'Canny'));
+                        title('Edges using canny');
                     case 2
                         close all;
                         figure, imshow(edge(image_gray,'log'));
+                        title('Edges using log');
                     case 3
                         close all;
                         figure, imshow(edge(image_gray,'Prewitt'));
+                        title('Edges using prewitt');
                     case 4
                         close all;
                         figure, imshow(edge(image_gray,'Roberts'));
+                        title('Edges using roberts');
                     case 5
                         close all;
                         figure, imshow(edge(image_gray,'Sobel'));
+                        title('Edges using sobel');
                     case 6
                         close all;
                         figure, imshow(edge(image_gray,'zerocross'));
+                        title('Edges using zerocross');
                     case 0
                         close all;
                         break;
@@ -451,25 +474,29 @@ while(true)
         case 11
             close all;
             figure, imshow(blocks,[]);
+            title('Quadtree');
             disp(divider);
         case 12
             close all;
             figure, imshow(mat2gray(abs(imgdx)));
+            title('Derivative in x');
             disp(divider);
         case 13
             close all;
             figure, imshow(mat2gray(abs(imgdy)));
+            title('Derivative in y');
             disp(divider);
         case 14
             close all;
             figure, imshow(mat2gray(modG));
+            title('Module');
             disp(divider);
         case 15
             close all;
             % Compute boundaries
             [B,L,N,A] = bwboundaries(bw);
-            figure; imshow(bw); hold on;
-
+            figure; imshow(bw);
+            title('Boundaries of unprocessed binary image'); hold on;
             % Loop through object boundaries
             for k = 1:N
                 % Boundary k is the parent of a hole if the k-th column
@@ -489,7 +516,8 @@ while(true)
             close all;
             % Compute boundaries
             [B,L,N,A] = bwboundaries(bw_final);
-            figure; imshow(bw_final); hold on;
+            figure; imshow(bw_final);
+            title('Boundaries of processed binary image'); hold on;
             % Loop through object boundaries
             for k = 1 : N
                 % Boundary k is the parent of a hole if the k-th column
@@ -516,11 +544,13 @@ while(true)
             plot(G,'g');
             plot(B,'b');
             legend('Red channel','Green channel','Blue channel');
+            title('RGB histogram');
             hold off;
             disp(divider);
         case 18
             close all;
             figure, imhist(image_gray);
+            title('Grayscale histogram');
             disp(divider);
         case 19
             close all;
@@ -536,6 +566,7 @@ while(true)
             object_to_find = lb(uint16(lp(1)),uint16(cp(1))); % Get the label
             image_object = (lb == object_to_find); % Get only the mask for the object of interest
             figure, imshow(image_gray.*uint8(image_object)); % And operation
+            title('Object of choice');
             disp(divider);
         case 20
             close all;
@@ -543,7 +574,7 @@ while(true)
             imshow(image);
             subplot(2,1,2);
             imshow(imadjust(mat2gray(H)),'XData',T,'YData',R,'InitialMagnification','fit');
-            title('Hough transform.');
+            title('Hough transform');
             xlabel('\theta'), ylabel('\rho');
             axis on, axis normal, hold on;
             colormap(hot);
@@ -559,6 +590,9 @@ while(true)
             disp(divider);
         case 22
             close all;
+            figure; imshowpair(Gmag, Gdir, 'montage');
+            title('Gradient magnitude and gradient direction using Sobel method')
+            axis off;
             disp(divider);
         case 0
             close all;
