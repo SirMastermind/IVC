@@ -147,6 +147,12 @@ imgdx = filter2(Hx,image(:,:,1));
 % Compute module
 modG = sqrt(imgdy.^2 + imgdx.^2);
 
+% Hough Transform
+hough_image = edge(image_gray, 'canny');
+[H,T,R] = hough(hough_image,'RhoResolution',0.5,'ThetaResolution',0.5);
+
+% Limited theta range Hough transform
+[H_h,T_h,R_h] = hough(image_gray, 'Theta', 44:0.5:46);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%% Input and program's flow %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -179,6 +185,9 @@ while(true)
     disp('     17 - Show histogram RGB;');
     disp('     18 - Show histogram grayscale;');
     disp('     19 - See specific object from mask;');
+    disp('     20 - Hough transform;');
+    disp('     21 - Limited theta range Hough transform;');
+    disp('     22 - Detect lines using Hough transform;');
     disp('     0 - Exit.');
     disp(' ');
     option = input('Your option: ');
@@ -310,76 +319,93 @@ while(true)
             disp(divider);
         case 9
             close all;
-            disp('Click on an object to see which are the most similliar to it');
-            figure, imshow(bw_final), hold on;
-            N = 1;
-            but = 1;
-            [ci,li,but] = ginput(1);
-            if but == 1 % Left click
-                cp(N) =  ci;
-                lp(N) =  li;
-            end
-            
-            object_1 = lb(uint16(lp(1)),uint16(cp(1)));
-            circularity = individual_circularities(object_1);
-            
-            %Create a vector with the module diferences between the
-            %circularity of the chosen object and all the other objects
-            difs = zeros(1, length(individual_circularities)); 
-            for i=1 : length(difs)
-                difs(i) = abs(circularity - individual_circularities(i));
-            end
-            
-            %Sort the labels (indexes), from the most similiar to the less,
-            %and prints in the center of each object
-            [sorted, indexes] = sort(difs);
-            for i=1 : length(indexes)
-                x1 = centroids(indexes(i),2);
-                y1 = centroids(indexes(i),1);
-                str = [num2str(i)];
-                t = text(x1,y1,str);
-                s = t.Color;
-                t.Color = [1.0 0.0 0.0];
-                s = t.FontSize;
-                t.FontSize = 35;
-            end
-            
-%             For Circularities-2
-%             close all;
-%             disp('Click on an object to see which are the most similliar to it');
-%             figure, imshow(bw_final), hold on;
-%             N = 1;
-%             but = 1;
-%             [ci,li,but] = ginput(1);
-%             if but == 1 % Left click
-%                 cp(N) =  ci;
-%                 lp(N) =  li;
-%             end
-%             
-%             object_1 = lb(uint16(lp(1)),uint16(cp(1)));
-%             circularity = individual_circularities2(object_1);
-%             
-%             %Create a vector with the module diferences between the
-%             %circularity of the chosen object and all the other objects
-%             difs = zeros(1, length(individual_circularities2)); 
-%             for i=1 : length(difs)
-%                 difs(i) = abs(circularity - individual_circularities2(i));
-%             end
-%             
-%             %Sort the labels (indexes), from the most similiar to the less,
-%             %and prints in the center of each object
-%             [sorted, indexes] = sort(difs);
-%             for i=1 : length(indexes)
-%                 x1 = centroids(indexes(i),2);
-%                 y1 = centroids(indexes(i),1);
-%                 str = [num2str(i)];
-%                 t = text(x1,y1,str);
-%                 s = t.Color;
-%                 t.Color = [1.0 0.0 0.0];
-%                 s = t.FontSize;
-%                 t.FontSize = 35;
-%             end
-           
+            while(true)
+                disp(' ');
+                disp('Please, choose a method:');
+                disp('     1 - Circularity 1;');
+                disp('     2 - Circularity 2;');
+                disp('     0 - Go to previous menu.');
+                option = input('Your method: ');
+                switch option
+                    case 1
+                        close all;
+                        disp('Click on an object to see which are the most similiar to it');
+                        figure, imshow(bw_final), hold on;
+                        N = 1;
+                        but = 1;
+                        [ci,li,but] = ginput(1);
+                        if but == 1 % Left click
+                            cp(N) =  ci;
+                            lp(N) =  li;
+                        end
+
+                        object_1 = lb(uint16(lp(1)),uint16(cp(1)));
+                        circularity = individual_circularities(object_1);
+
+                        %Create a vector with the module diferences between the
+                        %circularity of the chosen object and all the other objects
+                        difs = zeros(1, length(individual_circularities)); 
+                        for i=1 : length(difs)
+                            difs(i) = abs(circularity - individual_circularities(i));
+                        end
+
+                        %Sort the labels (indexes), from the most similiar to the less,
+                        %and prints in the center of each object
+                        [sorted, indexes] = sort(difs);
+                        for i=1 : length(indexes)
+                            x1 = centroids(indexes(i),2);
+                            y1 = centroids(indexes(i),1);
+                            str = [num2str(i)];
+                            t = text(x1,y1,str);
+                            s = t.Color;
+                            t.Color = [1.0 0.0 0.0];
+                            s = t.FontSize;
+                            t.FontSize = 35;
+                        end
+                    case 2
+                        close all;
+                        disp('Click on an object to see which are the most similliar to it');
+                        figure, imshow(bw_final), hold on;
+                        N = 1;
+                        but = 1;
+                        [ci,li,but] = ginput(1);
+                        if but == 1 % Left click
+                            cp(N) =  ci;
+                            lp(N) =  li;
+                        end
+
+                        object_1 = lb(uint16(lp(1)),uint16(cp(1)));
+                        circularity = individual_circularities2(object_1);
+
+                        %Create a vector with the module diferences between the
+                        %circularity of the chosen object and all the other objects
+                        difs = zeros(1, length(individual_circularities2)); 
+                        for i=1 : length(difs)
+                            difs(i) = abs(circularity - individual_circularities2(i));
+                        end
+
+                        %Sort the labels (indexes), from the most similiar to the less,
+                        %and prints in the center of each object
+                        [sorted, indexes] = sort(difs);
+                        for i=1 : length(indexes)
+                            x1 = centroids(indexes(i),2);
+                            y1 = centroids(indexes(i),1);
+                            str = [num2str(i)];
+                            t = text(x1,y1,str);
+                            s = t.Color;
+                            t.Color = [1.0 0.0 0.0];
+                            s = t.FontSize;
+                            t.FontSize = 35;
+                        end
+                    case 0
+                        close all;
+                        break;
+                    otherwise
+                        close all;
+                        disp('Please, insert a valid method.');
+                disp(divider);
+                end
+            end   
         case 10
             close all;
             while(true)
@@ -510,6 +536,29 @@ while(true)
             object_to_find = lb(uint16(lp(1)),uint16(cp(1))); % Get the label
             image_object = (lb == object_to_find); % Get only the mask for the object of interest
             figure, imshow(image_gray.*uint8(image_object)); % And operation
+            disp(divider);
+        case 20
+            close all;
+            subplot(2,1,1);
+            imshow(image);
+            subplot(2,1,2);
+            imshow(imadjust(mat2gray(H)),'XData',T,'YData',R,'InitialMagnification','fit');
+            title('Hough transform.');
+            xlabel('\theta'), ylabel('\rho');
+            axis on, axis normal, hold on;
+            colormap(hot);
+            disp(divider);
+        case 21
+            close all;
+            figure;
+            imshow(imadjust(mat2gray(H_h)),'XData',T_h,'YData',R_h,'InitialMagnification','fit');
+            title('Limited Theta Range Hough Transform of Gantrycrane Image');
+            xlabel('\theta'), ylabel('\rho');
+            axis on, axis normal;
+            colormap(hot);
+            disp(divider);
+        case 22
+            close all;
             disp(divider);
         case 0
             close all;
