@@ -16,8 +16,11 @@ while(true)
     disp('     4 - Moedas4.jpg;');
     disp('     5 - Moedas5.jpg;');
     disp('     6 - Moedas6.jpg;');
-    disp('     7 - cube.png;');
-    disp('     8 - ring.png;');
+    disp('     7 - Moedas7.jpg;');
+    disp('     8 - Moedas8.jpg;');
+    disp('     9 - Moedas9.jpg;');
+    disp('     10 - cube.png;');
+    disp('     11 - ring.png;');
     disp('     0 - Exit Matlab.');
     disp(' ');
     option = input('Your choice: ');
@@ -42,9 +45,18 @@ while(true)
             image = imread('Moedas6.jpg');
             break;
         case 7
-            image = imread('cube.png');
+            image = imread('Moedas7.jpg');
             break;
         case 8
+            image = imread('Moedas8.jpg');
+            break;
+        case 9
+            image = imread('Moedas9.jpg');
+            break;
+        case 10
+            image = imread('cube.png');
+            break;
+        case 11
             image = imread('ring.png');
             break;
         case 0
