@@ -66,7 +66,7 @@ while(true)
     disp(divider);
     end
 end
-  
+
 disp(' ');
 disp('The program started processing your image...');
 disp(' ');
@@ -313,7 +313,7 @@ while(true)
             end
             plot(y_perimeters, x_perimeters, 'r.', 'LineWidth', 5);
             set(gca,'Color','None');
-            hold off
+            hold off;
             disp(divider);
         case 6
             close all;
@@ -348,7 +348,7 @@ while(true)
         case 8
             close all;
             disp('Click on two objects.');
-            figure, imshow(bw_final), hold on;
+            figure, imshow(image), hold on;
             title('Distance between centroids');
             N = 0;
             but = 1;
@@ -401,12 +401,13 @@ while(true)
                 disp('     1 - Circularity 1;');
                 disp('     2 - Circularity 2;');
                 disp('     0 - Go to previous menu.');
+                disp(' ');
                 option = input('Your method: ');
                 switch option
                     case 1
                         close all;
                         disp('Click on an object to see which are the most similiar to it');
-                        figure, imshow(bw_final), hold on;
+                        figure, imshow(image), hold on;
                         title('Similarity using circularity 1');
                         N = 1;
                         but = 1;
@@ -439,10 +440,18 @@ while(true)
                             s = t.FontSize;
                             t.FontSize = 35;
                         end
+                        figure, title('Images numbered by similarity of circularity 1. Increasing difference with numbers.'), hold on;
+                        for i = 1 : length(indexes) % For each sorted index of the objects
+                            boundingBox = stats(indexes(i)).BoundingBox; % Get the bounding box
+                            part = imcrop(image, boundingBox); % Crop the original image to keep only the original bounding box
+                            subplot(1,length(indexes),i), imshow(part); % Put the small picture in one full figure
+                            title_part = sprintf('%d', i); % Name it
+                            title(title_part);
+                        end
                     case 2
                         close all;
                         disp('Click on an object to see which are the most similiar to it');
-                        figure, imshow(bw_final), hold on;
+                        figure, imshow(image), hold on;
                         title('Similarity using circularity 2');
                         N = 1;
                         but = 1;
@@ -474,6 +483,14 @@ while(true)
                             t.Color = [1.0 0.0 0.0];
                             s = t.FontSize;
                             t.FontSize = 35;
+                        end
+                        figure, title('Images numbered by similarity of circularity 2. Increasing difference with numbers.'), hold on;
+                        for i = 1 : length(indexes) % For each sorted index of the objects
+                            boundingBox = stats(indexes(i)).BoundingBox; % Get the bounding box
+                            part = imcrop(image, boundingBox); % Crop the original image to keep only the original bounding box
+                            subplot(1,length(indexes),i), imshow(part); % Put the small picture in one full figure
+                            title_part = sprintf('%d', i); % Name it
+                            title(title_part);
                         end
                     case 0
                         close all;
