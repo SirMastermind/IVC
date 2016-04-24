@@ -27,37 +27,37 @@ while(true)
     disp(' ');
     switch option
         case 1
-            image = imread('Moedas1.jpg');
+            image = imread('images/Moedas1.jpg');
             break;
         case 2
-            image = imread('Moedas2.jpg');
+            image = imread('images/Moedas2.jpg');
             break;
         case 3
-            image = imread('Moedas3.jpg');
+            image = imread('images/Moedas3.jpg');
             break;
         case 4
-            image = imread('Moedas4.jpg');
+            image = imread('images/Moedas4.jpg');
             break;
         case 5
-            image = imread('Moedas5.jpg');
+            image = imread('images/Moedas5.jpg');
             break;
         case 6
-            image = imread('Moedas6.jpg');
+            image = imread('images/Moedas6.jpg');
             break;
         case 7
-            image = imread('Moedas7.jpg');
+            image = imread('images/Moedas7.jpg');
             break;
         case 8
-            image = imread('Moedas8.jpg');
+            image = imread('images/Moedas8.jpg');
             break;
         case 9
-            image = imread('Moedas9.jpg');
+            image = imread('images/Moedas9.jpg');
             break;
         case 10
-            image = imread('cube.png');
+            image = imread('images/cube.png');
             break;
         case 11
-            image = imread('ring.png');
+            image = imread('images/ring.png');
             break;
         case 0
             exit;
@@ -589,6 +589,7 @@ while(true)
                     end
                 end
             end
+            legend('External boundary','Inner boundary');
             disp(divider);
         case 16
             close all;
@@ -610,6 +611,7 @@ while(true)
                     end
                 end
             end
+            legend('External boundary','Inner boundary');
             disp(divider);
         case 17
             close all;            
