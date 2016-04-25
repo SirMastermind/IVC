@@ -7,6 +7,10 @@ divider = sprintf('<----------------------------------------------->');
 disp('Welcome to the first project!');
 disp(' ');
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Input %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 while(true)
     disp(' ');
     disp('Please, choose a picture:');
@@ -137,11 +141,11 @@ for i = 1 : size(distance,1) % For each lines
     end
 end
     
-% Compute differences between objects to find similarity between circularities
-perimeters4 = bwperim(bw_final, 4);
-labeled_perimeters8 = bwlabel(perimeters8 - perimeters4);
-labeled_perimeters4 = bwlabel(perimeters4);
-individual_circularities2 = zeros(1, length(objects));
+% Compute differences between objects to find similarity between regions
+perimeters4 = bwperim(bw_final, 4); % Find perimeters for each region with 4 neighbors
+labeled_perimeters8 = bwlabel(perimeters8 - perimeters4); % Find perimeters for each region with only oblique neighbors
+labeled_perimeters4 = bwlabel(perimeters4); % Label the regions of the perimters
+individual_circularities2 = zeros(1, length(objects)); % To save the computations
 individual_perimeters = zeros(1,length(objects)); % Vector to save each object's perimeter
 for i = 1 : length(individual_perimeters)
     count8s = 0; % Counter perimeter8 - perimeter4
@@ -160,16 +164,17 @@ for i = 1 : length(individual_perimeters)
         end
     end
     
-    radius_mean = (1/(j*k)) * radius_mean; %Final calculus of radius mean
+    radius_mean = (1/(j*k)) * radius_mean; % Final calculus of radius mean
     
-    %New iteration to calculate radius variation
+    % New iteration to calculate radius variation
     for j = 1 : size(labeled_perimeters8,1)
         for k = 1 : size(labeled_perimeters8,2)
-            radius_var = radius_var + (norm([j-centroids(i,1) k-centroids(i,2)]) - radius_mean)^2; %Sum part of the radius variation calculus
+            radius_var = radius_var + (norm([j-centroids(i,1) k-centroids(i,2)]) - radius_mean)^2; % Sum part of the radius variation calculus
         end
     end
-    radius_var = sqrt((1/(j*k)) * radius_var); %Final calculus of radius variation
-    individual_circularities2(i) = radius_mean / radius_var;
+    
+    radius_var = sqrt((1/(j*k)) * radius_var); % Final calculus of radius variation
+    individual_circularities2(i) = radius_mean / radius_var; % Compute individual circularity for each region
     individual_perimeters(i) = count4s + sqrt(2) * count8s; % Calculate object-i's perimeter
 end
 
@@ -183,15 +188,16 @@ output_size = [power(2,nextpow2(size(image_gray, 1))), power(2,nextpow2(size(ima
 S = qtdecomp(imresize(image_gray, output_size) , 0.27); % Resize it to the output size and decomposition in quadtree
 blocks = repmat(uint8(0),size(S)); % Get the blocks
 
-for dim = [512 256 128 64 32 16 8 4 2 1];    
-  numblocks = length(find(S==dim));    
+for dim = [512 256 128 64 32 16 8 4 2 1]; % For each dimension of power 2
+  numblocks = length(find(S==dim)); % Find blocks the size of the current dimension 
   if (numblocks > 0)        
-    values = repmat(uint8(1),[dim dim numblocks]);
-    values(2:dim,2:dim,:) = 0;
-    blocks = qtsetblk(blocks,S,dim,values);
+    values = repmat(uint8(1),[dim dim numblocks]); % New block with the dimensions
+    values(2:dim,2:dim,:) = 0; % Put it to zeros in the middle
+    blocks = qtsetblk(blocks,S,dim,values); % Set the blocks with the new values
   end
 end
 
+% Put the blocks' perimeters to 1
 blocks(end,1:end) = 1;
 blocks(1:end,end) = 1;
 
@@ -221,7 +227,7 @@ hough_image = edge(image_gray, 'canny');
 time = toc; % To measure the time it took to process the image
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%% Input and program's flow %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%% Program's flow %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 disp('Image processed!');
@@ -290,6 +296,7 @@ while(true)
                 y_plot = [ y_plot centroids(i, 2) ];
             end
             plot(y_plot, x_plot, 'r.', 'MarkerSize', 30);
+            legend('Centroid');
             disp(divider);
         case 4
             close all;
@@ -313,6 +320,7 @@ while(true)
             end
             plot(y_perimeters, x_perimeters, 'r.', 'LineWidth', 5);
             set(gca,'Color','None');
+            legend('Perimeter');
             hold off;
             disp(divider);
         case 6
@@ -381,6 +389,7 @@ while(true)
             t.Color = [1.0 0.0 0.0];
             s = t.FontSize;
             t.FontSize = 35;
+            legend('Distance between selected dots');
             
             disp('Right click to close the image.');
             but = 32;
