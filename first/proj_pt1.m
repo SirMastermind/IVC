@@ -370,15 +370,13 @@ while(true)
                     cp(N) =  ci;
                     lp(N) =  li;
                     plot(ci,li,'r.','MarkerSize',8); drawnow;
-                    if N > 1
-                        plot(cp(:),lp(:),'r.-','MarkerSize',8); drawnow;
-                    end
                 end
                 if size(cp,2) == 2
                     break;
                 end
             end
             close;
+            disp('Please, wait a second.');
             figure('Name','Distance between centroids of two objects','NumberTitle','off'), imshow(image), hold on;
             object_1 = lb(uint16(lp(1)),uint16(cp(1)));
             object_2 = lb(uint16(lp(2)),uint16(cp(2)));
