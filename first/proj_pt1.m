@@ -272,8 +272,8 @@ while(true)
     switch option
         case 1
             close all;
-            figure, imshow(image_gray.*uint8(bw_final));
-            title('Objects detected');
+            figure('Name','Objects detected','NumberTitle','off'), hold on;
+            imshow(image_gray.*uint8(bw_final));
             disp(divider);
         case 2
             close all;
@@ -286,8 +286,7 @@ while(true)
                 string = sprintf('Object %d has centroid in (%0.2f, %0.2f).', i, centroids(i,1), centroids(i,2));
                 disp(string);
             end
-            figure, imshow(image_gray);
-            title('Centroids of the objects');
+            figure('Name','Centroids of the objects','NumberTitle','off'), imshow(image_gray);
             hold on;
             x_plot = [];
             y_plot = [];
@@ -300,13 +299,11 @@ while(true)
             disp(divider);
         case 4
             close all;
-            figure, imshow(perimeters8); 
-            title('Perimeters of the objects in binary image');
+            figure('Name','Perimeters of the objects in binary image','NumberTitle','off'), imshow(perimeters8); 
             disp(divider);
         case 5
             close all;
-            figure, imshow(image);
-            title('Perimeters of the objects in original image');
+            figure('Name','Perimeters of the objects in original image','NumberTitle','off'), imshow(image);
             hold on
             x_perimeters = [];
             y_perimeters = [];
@@ -325,8 +322,7 @@ while(true)
             disp(divider);
         case 6
             close all;
-            figure, imshow(image_gray.*uint8(bw_final));
-            title('Area occupied by the objects');
+            figure('Name','Area in grayscale of the objects','NumberTitle','off'), imshow(image_gray.*uint8(bw_final));
             for i=1 : size(centroids, 1)
                 x1 = centroids(i,2);
                 y1 = centroids(i,1);
@@ -337,11 +333,19 @@ while(true)
                 s = t.FontSize;
                 t.FontSize = 30;
             end
+            figure('Name','Increasing area from left to right','NumberTitle','off'), hold on;
+            [sorted, indexes] = sort(objects); % Sort areas
+            for i = 1 : length(indexes) % For each sorted index of the objects
+                boundingBox = stats(indexes(i)).BoundingBox; % Get the bounding box
+                part = imcrop(image, boundingBox); % Crop the original image to keep only the original bounding box
+                subplot(1,length(indexes),i), imshow(part); % Put the small picture in one full figure
+                title_part = sprintf('%d', i); % Name it
+                title(title_part);
+            end
             disp(divider);
         case 7
             close all;
-            figure, imshow(mat2gray(lb));
-            title('Areas with different colors by labels ');
+            figure('Name','Areas with different colors by labels','NumberTitle','off'), imshow(mat2gray(lb));
             for i=1 : size(centroids, 1)
                 x1 = centroids(i,2);
                 y1 = centroids(i,1);
@@ -356,8 +360,7 @@ while(true)
         case 8
             close all;
             disp('Click on two objects.');
-            figure, imshow(image), hold on;
-            title('Distance between centroids');
+            figure('Name','Distance between centroids of two objects','NumberTitle','off'), imshow(image), hold on;
             N = 0;
             but = 1;
             while (but == 1)
@@ -416,8 +419,7 @@ while(true)
                     case 1
                         close all;
                         disp('Click on an object to see which are the most similiar to it');
-                        figure, imshow(image), hold on;
-                        title('Similarity using circularity 1');
+                        figure('Name','Similarity using circularity 1','NumberTitle','off'), imshow(image), hold on;
                         N = 1;
                         but = 1;
                         [ci,li,but] = ginput(1);
@@ -449,7 +451,7 @@ while(true)
                             s = t.FontSize;
                             t.FontSize = 35;
                         end
-                        figure, title('Images numbered by similarity of circularity 1. Increasing difference with numbers.'), hold on;
+                        figure('Name','Similarity decreasing from left to right','NumberTitle','off'), hold on;
                         for i = 1 : length(indexes) % For each sorted index of the objects
                             boundingBox = stats(indexes(i)).BoundingBox; % Get the bounding box
                             part = imcrop(image, boundingBox); % Crop the original image to keep only the original bounding box
@@ -460,8 +462,7 @@ while(true)
                     case 2
                         close all;
                         disp('Click on an object to see which are the most similiar to it');
-                        figure, imshow(image), hold on;
-                        title('Similarity using circularity 2');
+                        figure('Name','Similarity using circularity 2','NumberTitle','off'), imshow(image), hold on;
                         N = 1;
                         but = 1;
                         [ci,li,but] = ginput(1);
@@ -493,7 +494,7 @@ while(true)
                             s = t.FontSize;
                             t.FontSize = 35;
                         end
-                        figure, title('Images numbered by similarity of circularity 2. Increasing difference with numbers.'), hold on;
+                        figure('Name','Similarity decreasing from left to right','NumberTitle','off'), hold on;
                         for i = 1 : length(indexes) % For each sorted index of the objects
                             boundingBox = stats(indexes(i)).BoundingBox; % Get the bounding box
                             part = imcrop(image, boundingBox); % Crop the original image to keep only the original bounding box
@@ -526,28 +527,22 @@ while(true)
                 switch option
                     case 1
                         close all;
-                        figure, imshow(edge(image_gray,'Canny'));
-                        title('Edges using canny');
+                        figure('Name','Edges using canny','NumberTitle','off'), imshow(edge(image_gray,'Canny'));
                     case 2
                         close all;
-                        figure, imshow(edge(image_gray,'log'));
-                        title('Edges using log');
+                        figure('Name','Edges using log','NumberTitle','off'), imshow(edge(image_gray,'log'));
                     case 3
                         close all;
-                        figure, imshow(edge(image_gray,'Prewitt'));
-                        title('Edges using prewitt');
+                        figure('Name','Edges using prewitt','NumberTitle','off'), imshow(edge(image_gray,'Prewitt'));
                     case 4
                         close all;
-                        figure, imshow(edge(image_gray,'Roberts'));
-                        title('Edges using roberts');
+                        figure('Name','Edges using roberts','NumberTitle','off'), imshow(edge(image_gray,'Roberts'));
                     case 5
                         close all;
-                        figure, imshow(edge(image_gray,'Sobel'));
-                        title('Edges using sobel');
+                        figure('Name','Edges using sobel','NumberTitle','off'), imshow(edge(image_gray,'Sobel'));
                     case 6
                         close all;
-                        figure, imshow(edge(image_gray,'zerocross'));
-                        title('Edges using zerocross');
+                        figure('Name','Edges using zerocross','NumberTitle','off'), imshow(edge(image_gray,'zerocross'));
                     case 0
                         close all;
                         break;
@@ -560,30 +555,26 @@ while(true)
             disp(divider);
         case 11
             close all;
-            figure, imshow(blocks,[]);
-            title('Quadtree');
+            figure('Name','Quadtree of processed binary image','NumberTitle','off'), imshow(blocks,[]);
             disp(divider);
         case 12
             close all;
-            figure, imshow(mat2gray(abs(imgdx)));
-            title('Derivative in x');
+            figure('Name','Derivative in x','NumberTitle','off'), imshow(mat2gray(abs(imgdx)));
             disp(divider);
         case 13
             close all;
-            figure, imshow(mat2gray(abs(imgdy)));
-            title('Derivative in y');
+            figure('Name','Derivative in y','NumberTitle','off'), imshow(mat2gray(abs(imgdy)));
             disp(divider);
         case 14
             close all;
-            figure, imshow(mat2gray(modG));
-            title('Module');
+            figure('Name','Module','NumberTitle','off'), imshow(mat2gray(modG));
             disp(divider);
         case 15
             close all;
             % Compute boundaries
             [B,L,N,A] = bwboundaries(bw);
-            figure; imshow(bw);
-            title('Boundaries of unprocessed binary image'); hold on;
+            figure('Name','Boundaries of unprocessed binary image','NumberTitle','off'); imshow(bw);
+            hold on;
             % Loop through object boundaries
             for k = 1:N
                 % Boundary k is the parent of a hole if the k-th column
@@ -604,8 +595,8 @@ while(true)
             close all;
             % Compute boundaries
             [B,L,N,A] = bwboundaries(bw_final);
-            figure; imshow(bw_final);
-            title('Boundaries of processed binary image'); hold on;
+            figure('Name','Boundaries of processed binary image','NumberTitle','off'); imshow(bw_final);
+            hold on;
             % Loop through object boundaries
             for k = 1 : N
                 % Boundary k is the parent of a hole if the k-th column
@@ -627,24 +618,22 @@ while(true)
             R = imhist(image(:,:,1));
             G = imhist(image(:,:,2));
             B = imhist(image(:,:,3));
-            figure;
+            figure('Name','RGB histogram','NumberTitle','off');
             plot(R,'r');
             hold on;
             plot(G,'g');
             plot(B,'b');
             legend('Red channel','Green channel','Blue channel');
-            title('RGB histogram');
             hold off;
             disp(divider);
         case 18
             close all;
-            figure, imhist(image_gray);
-            title('Grayscale histogram');
+            figure('Name','Grayscale histogram','NumberTitle','off'), imhist(image_gray);
             disp(divider);
         case 19
             close all;
             disp('Click on an area to see the object behind it.');
-            figure, imshow(bw_final), hold on;
+            figure('Name','See behind mask','NumberTitle','off'), imshow(bw_final), hold on;
             N = 1;
             but = 1;
             [ci,li,but] = ginput(1);
@@ -655,42 +644,38 @@ while(true)
             object_to_find = lb(uint16(lp(1)),uint16(cp(1))); % Get the label
             image_object = (lb == object_to_find); % Get only the mask for the object of interest
             figure, imshow(image_gray.*uint8(image_object)); % And operation
-            title('Object of choice');
             disp(divider);
         case 20
             close all;
+            figure('Name','Hough transform','NumberTitle','off');
             subplot(2,1,1);
             imshow(image);
             subplot(2,1,2);
             imshow(imadjust(mat2gray(H)),'XData',T,'YData',R,'InitialMagnification','fit');
-            title('Hough transform');
             xlabel('\theta'), ylabel('\rho');
             axis on, axis normal, hold on;
             colormap(hot);
             disp(divider);
         case 21
             close all;
-            figure;
+            figure('Name','Limited Theta Range Hough Transform of Gantrycrane Image','NumberTitle','off');
             imshow(imadjust(mat2gray(H_h)),'XData',T_h,'YData',R_h,'InitialMagnification','fit');
-            title('Limited Theta Range Hough Transform of Gantrycrane Image');
             xlabel('\theta'), ylabel('\rho');
             axis on, axis normal;
             colormap(hot);
             disp(divider);
         case 22
             close all;
-            figure; imshowpair(Gmag, Gdir, 'montage');
-            title('Gradient magnitude and gradient direction using Sobel method')
+            figure('Name','Gradient magnitude and gradient direction using Sobel method','NumberTitle','off');
+            imshowpair(Gmag, Gdir, 'montage');
             axis off;
             disp(divider);
         case 23
             close all;
-            figure, imshow(bwmorph(bw,'skel',Inf));
-            title('Skeleton of the unprocessed binary image.');
+            figure('Name','Skeleton of the unprocessed binary image','NumberTitle','off'), imshow(bwmorph(bw,'skel',Inf));
         case 24
             close all;
-            figure, imshow(bwmorph(bw_final,'skel',Inf));
-            title('Skeleton of the processed binary image.');
+            figure('Name','Skeleton of the processed binary image','NumberTitle','off'), imshow(bwmorph(bw_final,'skel',Inf));
         case 0
             close all;
             disp('Goodbye.');
