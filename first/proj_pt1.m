@@ -360,7 +360,7 @@ while(true)
         case 8
             close all;
             disp('Click on two objects.');
-            figure('Name','Distance between centroids of two objects','NumberTitle','off'), imshow(image), hold on;
+            figure('Name','Click on two objects','NumberTitle','off'), imshow(image), hold on;
             N = 0;
             but = 1;
             while (but == 1)
@@ -378,12 +378,17 @@ while(true)
                     break;
                 end
             end
+            close;
+            figure('Name','Distance between centroids of two objects','NumberTitle','off'), imshow(image), hold on;
             object_1 = lb(uint16(lp(1)),uint16(cp(1)));
             object_2 = lb(uint16(lp(2)),uint16(cp(2)));
             centroid_1 = centroids(object_1, :);
             centroid_2 = centroids(object_2, :);
+            plot(centroid_1(2), centroid_1(1), 'r.-', 'MarkerSize', 8); drawnow;
+            plot(centroid_2(2), centroid_2(1), 'r.-', 'MarkerSize', 8); drawnow;
+            plot([centroid_1(2) centroid_2(2)], [centroid_1(1) centroid_2(1)], 'r.-', 'MarkerSize', 5); drawnow;
             distance_centroids = sqrt((centroid_1(1) - centroid_2(1))^2 + (centroid_1(2) - centroid_2(2))^2);
-    
+            hold on;
             x1 = centroid_1(1);
             y1 = centroid_1(2);
             str = ['Distance is ', num2str(uint16(distance_centroids))];
@@ -391,7 +396,8 @@ while(true)
             s = t.Color;
             t.Color = [1.0 0.0 0.0];
             s = t.FontSize;
-            t.FontSize = 35;
+            t.FontSize = 25;
+
             legend('Distance between selected dots');
             
             disp('Right click to close the image.');
