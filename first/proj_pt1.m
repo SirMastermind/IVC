@@ -25,6 +25,8 @@ while(true)
     disp('     9 - Moedas9.jpg;');
     disp('     10 - cube.png;');
     disp('     11 - ring.png;');
+    disp('     12 - MoedasA.jpg;');
+    disp('     13 - MoedasB.jpg;');
     disp('     0 - Exit Matlab.');
     disp(' ');
     option = input('Your choice: ');
@@ -63,6 +65,12 @@ while(true)
         case 11
             image = imread('images/ring.png');
             break;
+        case 12
+            image = imread('images/MoedasA.jpg');
+            break;
+        case 13
+            image = imread('images/MoedasB.jpg');
+            break;
         case 0
             exit;
         otherwise
@@ -89,7 +97,7 @@ bw = im2bw(image_gray, graythresh(image_gray));
 %figure,imshow(bw);
 
 % Use closure to get the shapes well defined
-se = strel('disk', 3);
+se = strel('disk', 5);
 bw_final = imclose(bw,se);
 bw_final = bwmorph(bw_final,'hbreak'); % Removes H-connected pixels
 bw_final = bwmorph(bw_final,'spur'); % Removes spur pixels
