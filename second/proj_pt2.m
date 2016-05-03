@@ -1,7 +1,7 @@
 close all;
 clear all;
 
-path = '/Users/Tommy/GitHub/IVC/second/DATASET1/TRAINING/CAMERA1_JPEGS/';
+path = 'DATASET1/TRAINING/CAMERA1_JPEGS/';
 frameIdComp = 4;
 str = ['%s%.' num2str(frameIdComp) 'd.%s'];
 
