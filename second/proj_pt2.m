@@ -65,7 +65,7 @@ for k = 1 : size(d,3)
             if (abs(boundingBox(3)/boundingBox(4) - 1) < 0.09)
                 continue;
             end
-            if (boundingBox(3)/boundingBox(4) > 1)
+            if (boundingBox(3)/boundingBox(4) > 1) %boundingBox(3) = width; boundingBox(4) = height. When width > height, it is a car
                 rectangle('Position', boundingBox, 'EdgeColor','r', 'LineWidth', 2);
             else
                 rectangle('Position', boundingBox, 'EdgeColor','b', 'LineWidth', 2);
