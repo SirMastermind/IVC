@@ -3,14 +3,17 @@ close all;
 clear;
 beep on;
 
-mode = 'movie';
-
-pathing = zeros(2, nFrame, 3);
-nF = 0;
-nOD = 0;
+mode = 'movie'; % pictures, movie
+show = 'plot'; % boxes, path, plot
 
 nFrame = 3065;
 step = 5;
+
+pathing = zeros(2, nFrame, 3);
+nF = 1;
+nOD = 0;
+
+maxObjs = 1;
 
 if(strcmp(mode,'picture'))
     path = 'DATASET1/TESTING/CAMERA1_JPEGS/';
@@ -67,70 +70,112 @@ for k = 2 : (nFrame/step - 1)
     bw_final = bwareaopen(bw_final, 150);
     d(:, :, k) = bw_final + previous_bw;
     previous_bw = bw_final;
+    [lb, num]= bwlabel(d(:, :, k));
+    if(num > maxObjs)
+        maxObjs = num;
+    end
 end
 
 beep;
 
-for k = 1 : size(d,3)
-    % Find and label the different regions
-    [lb, num]= bwlabel(d(:, :, k));
+switch show
+    case 'boxes'
+        for k = 1 : size(d,3)
+            % Find and label the different regions
+            [lb, num]= bwlabel(d(:, :, k));
 
-    % Get the stats of each label
-    stats = regionprops(lb);
+            % Get the stats of each label
+            stats = regionprops(lb);
 
-    % Compute area for each region
-    objects = [stats.Area];
-    nOD = max(nOD, length(objects));
-    % Compute centroid for each region
-    centroids = zeros(length(objects), 2); % To save (sum of lines, sum of columns) for each label
-    for i = 1 : size(lb,1) % For each lines
-        for j = 1 : size(lb,2) % For each column
-            if lb(i,j) ~= 0 % If it's not background
-                centroids(lb(i,j),1) = centroids(lb(i,j),1) + i; % Sum the lines
-                centroids(lb(i,j),2) = centroids(lb(i,j),2) + j; % Sum the columns
+            % Compute area for each region
+            objects = [stats.Area];
+            
+            imagesc(uint8(vid3D(:, :, k))); colormap gray; hold on;
+
+            if num > 0
+                for i = 1 : num
+                    boundingBox = stats(i).BoundingBox;
+                    if (abs(boundingBox(3)/boundingBox(4) - 1) < 0.09)
+                        continue;
+                    end
+                    if (boundingBox(3)/boundingBox(4) > 1) %boundingBox(3) = width; boundingBox(4) = height. When width > height, it is a car
+                        rectangle('Position', boundingBox, 'EdgeColor','r', 'LineWidth', 2);
+                    else
+                        rectangle('Position', boundingBox, 'EdgeColor','b', 'LineWidth', 2);
+                    end
+                end
+            end
+            drawnow;
+            hold off;
+        end
+    case 'path'
+         for k = 1 : size(d,3)
+            % Find and label the different regions
+            [lb, num]= bwlabel(d(:, :, k));
+            % Get the stats of each label
+            stats = regionprops(lb);
+
+            % Compute area for each region
+            objects = [stats.Area];
+            nOD = max(nOD, length(objects));
+            % Compute centroid for each region
+            centroids = zeros(length(objects), 2); % To save (sum of lines, sum of columns) for each label
+            for i = 1 : size(lb,1) % For each lines
+                for j = 1 : size(lb,2) % For each column
+                    if lb(i,j) ~= 0 % If it's not background
+                        centroids(lb(i,j),1) = centroids(lb(i,j),1) + i; % Sum the lines
+                        centroids(lb(i,j),2) = centroids(lb(i,j),2) + j; % Sum the columns
+                    end
+                end
+            end
+
+            for l = 1 : length(objects) % For each object
+                centroids(l,1) = centroids(l,1)/objects(l); % lines' = sum(lines)/area
+                centroids(l,2) = centroids(l,2)/objects(l); % columns' = sum(columns)/area
+                pathing(1, nF, l) = centroids(l,1);
+                pathing(2, nF, l) = centroids(l,2);
+            end
+
+            imagesc(uint8(vid3D(:, :, k))); colormap gray; hold on;
+
+            for i = 1 : num
+                x_plot = [];
+                y_plot = [];
+                for j = 1 : nF
+                    x_plot = [ x_plot pathing(1, j, i) ];
+                    y_plot = [ y_plot pathing(2, j, i) ];
+                end
+                if(stats(i).BoundingBox(3) / stats(i).BoundingBox(4) > 1)
+                    plot(y_plot, x_plot, 'r.', 'MarkerSize', 5);
+                else
+                    plot(y_plot, x_plot, 'b.', 'MarkerSize', 5);
+                end
+                drawnow;
+            end
+            hold off;
+            nF = nF+1;
+        end
+    case 'plot'
+        numbers = zeros(size(d,3), maxObjs);
+        for k = 1 : size(d,3)       
+            % Find and label the different regions
+            [lb, num]= bwlabel(d(:, :, k));
+            % Get the stats of each label
+            stats = regionprops(lb);
+
+            % Compute area for each region
+            objects = [stats.Area];
+            for i = 1 : length(objects)
+                numbers(k,i) = objects(i);
             end
         end
-    end
-
-    for l = 1 : length(objects) % For each object
-        centroids(l,1) = centroids(l,1)/objects(l); % lines' = sum(lines)/area
-        centroids(l,2) = centroids(l,2)/objects(l); % columns' = sum(columns)/area
-        pathing(1, nF, l) = centroids(l,1);
-        pathing(2, nF, l) = centroids(l,2);
-    end
-    
-
-    imagesc(uint8(vid3D(:, :, k))); colormap gray; hold on;
-    
-    if num > 0
-        for i = 1 : num
-            boundingBox = stats(i).BoundingBox;
-            if (abs(boundingBox(3)/boundingBox(4) - 1) < 0.09)
-                continue;
-            end
-            if (boundingBox(3)/boundingBox(4) > 1) %boundingBox(3) = width; boundingBox(4) = height. When width > height, it is a car
-                rectangle('Position', boundingBox, 'EdgeColor','r', 'LineWidth', 2);
-            else
-                rectangle('Position', boundingBox, 'EdgeColor','b', 'LineWidth', 2);
-            end
-        end
-    end
-    drawnow;
-    
-    for i = 1 : num
-        x_plot = [];
-        y_plot = [];
-        for j = 1 : nF
-            x_plot = [ x_plot pathing(1, j, i) ];
-            y_plot = [ y_plot pathing(2, j, i) ];
-        end
-        if(stats(i).BoundingBox(3) / stats(i).BoundingBox(4) > 1)
-            plot(y_plot, x_plot, 'r.', 'MarkerSize', 5);
-        else
-            plot(y_plot, x_plot, 'b.', 'MarkerSize', 5);
-        end
-        drawnow;
-    end
-    hold off;
-    nF = nF+1;
+        figure; hold on;
+        %plot(numbers);
+        plot(numbers(:,1),'y-');
+        plot(numbers(:,2),'r--');
+        plot(numbers(:,3),'g:');
+        plot(numbers(:,4),'b--o');
+        plot(numbers(:,5),'k-*');
+        legend('1','2','3','4','5');
+        hold off;
 end
