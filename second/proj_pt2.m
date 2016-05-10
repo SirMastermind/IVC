@@ -1,23 +1,41 @@
 %clc;
 close all;
 clear;
+beep on;
 
-path = 'DATASET1/TESTING/CAMERA1_JPEGS/';
-frameIdComp = 4;
-str = ['%s%.' num2str(frameIdComp) 'd.%s'];
+mode = 'movie';
 
-nFrame = 3065;
-step = 5;
 pathing = zeros(2, nFrame, 3);
 nF = 0;
 nOD = 0;
 
-vid3D = zeros([576 768 nFrame/step]);
-d = zeros([576 768 nFrame/step]);
-for k = 1 : 1 : nFrame/step
-    str1 = sprintf(str,path,k,'jpg');
-    img = imread(str1);
-    vid3D(:,:,k) = rgb2gray(img);
+nFrame = 3065;
+step = 5;
+
+if(strcmp(mode,'picture'))
+    path = 'DATASET1/TESTING/CAMERA1_JPEGS/';
+    frameIdComp = 4;
+    str = ['%s%.' num2str(frameIdComp) 'd.%s'];
+
+    vid3D = zeros([576 768 nFrame/step]);
+    d = zeros([576 768 nFrame/step]);
+    for k = 1 : 1 : nFrame/step
+        str1 = sprintf(str,path,k,'jpg');
+        img = imread(str1);
+        vid3D(:,:,k) = rgb2gray(img);
+    end
+else
+    vid = VideoReader('/Users/Tommy/GitHub/IVC/second/DATASET1/TRAINING/TRAINING/camera1.mp4');
+    nFrame = 120*25;
+    step = 5;
+
+    vid3D = zeros([vid.Height vid.Width nFrame/step]);
+    k=1;
+    for i = 1:step:nFrame
+        img = read(vid,i);
+        vid3D(:,:,k)=rgb2gray(img);
+        k = k+1;
+    end
 end
 
 bkg = median(vid3D,3);
@@ -50,6 +68,8 @@ for k = 2 : (nFrame/step - 1)
     d(:, :, k) = bw_final + previous_bw;
     previous_bw = bw_final;
 end
+
+beep;
 
 for k = 1 : size(d,3)
     % Find and label the different regions
