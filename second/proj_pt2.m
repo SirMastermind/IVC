@@ -8,6 +8,9 @@ str = ['%s%.' num2str(frameIdComp) 'd.%s'];
 
 nFrame = 3065;
 step = 5;
+pathing = zeros(2, nFrame, 3);
+nF = 0;
+nOD = 0;
 
 vid3D = zeros([576 768 nFrame/step]);
 d = zeros([576 768 nFrame/step]);
@@ -57,8 +60,28 @@ for k = 1 : size(d,3)
 
     % Compute area for each region
     objects = [stats.Area];
+    nOD = max(nOD, length(objects));
+    % Compute centroid for each region
+    centroids = zeros(length(objects), 2); % To save (sum of lines, sum of columns) for each label
+    for i = 1 : size(lb,1) % For each lines
+        for j = 1 : size(lb,2) % For each column
+            if lb(i,j) ~= 0 % If it's not background
+                centroids(lb(i,j),1) = centroids(lb(i,j),1) + i; % Sum the lines
+                centroids(lb(i,j),2) = centroids(lb(i,j),2) + j; % Sum the columns
+            end
+        end
+    end
+
+    for l = 1 : length(objects) % For each object
+        centroids(l,1) = centroids(l,1)/objects(l); % lines' = sum(lines)/area
+        centroids(l,2) = centroids(l,2)/objects(l); % columns' = sum(columns)/area
+        pathing(1, nF, l) = centroids(l,1);
+        pathing(2, nF, l) = centroids(l,2);
+    end
+    
 
     imagesc(uint8(vid3D(:, :, k))); colormap gray; hold on;
+    
     if num > 0
         for i = 1 : num
             boundingBox = stats(i).BoundingBox;
@@ -73,5 +96,21 @@ for k = 1 : size(d,3)
         end
     end
     drawnow;
+    
+    for i = 1 : num
+        x_plot = [];
+        y_plot = [];
+        for j = 1 : nF
+            x_plot = [ x_plot pathing(1, j, i) ];
+            y_plot = [ y_plot pathing(2, j, i) ];
+        end
+        if(stats(i).BoundingBox(3) / stats(i).BoundingBox(4) > 1)
+            plot(y_plot, x_plot, 'r.', 'MarkerSize', 5);
+        else
+            plot(y_plot, x_plot, 'b.', 'MarkerSize', 5);
+        end
+        drawnow;
+    end
     hold off;
+    nF = nF+1;
 end
