@@ -3,13 +3,14 @@ close all;
 clear;
 beep on;
 
-mode = 'movie'; % pictures, movie
-show = 'plot'; % boxes, path, plot
+mode = 'picture'; % picture, movie
+show = 'speed'; % boxes, path, plot
 
 nFrame = 3065;
 step = 5;
 
-pathing = zeros(2, nFrame, 3);
+pathing = zeros(2, nFrame, 5);
+speed = zeros(1, nFrame, 5);
 nF = 1;
 nOD = 0;
 
@@ -28,7 +29,10 @@ if(strcmp(mode,'picture'))
         vid3D(:,:,k) = rgb2gray(img);
     end
 else
-    vid = VideoReader('/Users/Tommy/GitHub/IVC/second/DATASET1/TRAINING/TRAINING/camera1.mp4');
+    path = 'DATASET1/TRAINING/TRAINING/';
+    file = 'camera1.mov';
+    str1 = strcat(path, file);
+    vid = VideoReader(str1);
     nFrame = 120*25;
     step = 5;
 
@@ -154,7 +158,42 @@ switch show
             end
             hold off;
             nF = nF+1;
-        end
+         end
+    case 'speed'
+        for k = 1 : size(d,3)
+            % Find and label the different regions
+            [lb, num]= bwlabel(d(:, :, k));
+            % Get the stats of each label
+            stats = regionprops(lb);
+
+            % Compute area for each region
+            objects = [stats.Area];
+            nOD = max(nOD, length(objects));
+            % Compute centroid for each region
+            centroids = zeros(length(objects), 2); % To save (sum of lines, sum of columns) for each label
+            for i = 1 : size(lb,1) % For each lines
+                for j = 1 : size(lb,2) % For each column
+                    if lb(i,j) ~= 0 % If it's not background
+                        centroids(lb(i,j),1) = centroids(lb(i,j),1) + i; % Sum the lines
+                        centroids(lb(i,j),2) = centroids(lb(i,j),2) + j; % Sum the columns
+                    end
+                end
+            end
+
+            for l = 1 : length(objects) % For each object
+                centroids(l,1) = centroids(l,1)/objects(l); % lines' = sum(lines)/area
+                centroids(l,2) = centroids(l,2)/objects(l); % columns' = sum(columns)/area
+                pathing(1, nF, l) = centroids(l,1);
+                pathing(2, nF, l) = centroids(l,2);
+                speed(1, nF, l) = sqrt((pathing(1, nF, l) - pathing(1, nF-1, l))^2 + (pathing(2, nF, l) - pathing(2, nF-1, l))^2);
+                disp(strcat('Speed = ', num2str(speed(1, nF, l))));
+            end
+
+            imagesc(uint8(vid3D(:, :, k))); colormap gray; hold on;
+
+            hold off;
+            nF = nF+1;
+        end        
     case 'plot'
         numbers = zeros(size(d,3), maxObjs);
         for k = 1 : size(d,3)       
