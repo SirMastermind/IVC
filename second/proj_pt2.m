@@ -3,14 +3,14 @@ close all;
 clear;
 beep on;
 
-mode = 'picture'; % picture, movie
+mode = 'movie'; % picture, movie
 show = 'speed'; % boxes, path, plot
 
 nFrame = 3065;
 step = 5;
 
 pathing = zeros(2, nFrame, 5);
-speed = zeros(1, nFrame, 5);
+speeds = zeros(1, nFrame, 5);
 nF = 1;
 nOD = 0;
 
@@ -185,11 +185,35 @@ switch show
                 centroids(l,2) = centroids(l,2)/objects(l); % columns' = sum(columns)/area
                 pathing(1, nF, l) = centroids(l,1);
                 pathing(2, nF, l) = centroids(l,2);
-                speed(1, nF, l) = sqrt((pathing(1, nF, l) - pathing(1, nF-1, l))^2 + (pathing(2, nF, l) - pathing(2, nF-1, l))^2);
-                disp(strcat('Speed = ', num2str(speed(1, nF, l))));
+                if(nF <= 5) %Nas primeiras 5 frames considera-se que nao ha speed
+                    speeds(1, nF, l) = 0;
+                else
+                    speeds(1, nF, l) = 100 * (sqrt((pathing(1, nF, l) - pathing(1, nF-5, l))^2 + (pathing(2, nF, l) - pathing(2, nF-5, l))^2) / 5);
+                end
+%                 if (speeds(1, nF, l) > 10000)
+%                     disp(strcat('Speed = ', num2str(speeds(1, nF, l))));
+%                 end
             end
 
             imagesc(uint8(vid3D(:, :, k))); colormap gray; hold on;
+            
+            if num > 0
+                for i = 1 : num
+                    boundingBox = stats(i).BoundingBox;
+                    speed = speeds(1, nF, i);
+                    if (abs(boundingBox(3)/boundingBox(4) - 1) < 0.09)
+                        continue;
+                    end
+                    if (speed > 10000) %It is a bike
+                        rectangle('Position', boundingBox, 'EdgeColor', 'g', 'LineWidth', 2);
+                    elseif (boundingBox(3)/boundingBox(4) > 1) %boundingBox(3) = width; boundingBox(4) = height. When width > height, it is a car
+                        rectangle('Position', boundingBox, 'EdgeColor','r', 'LineWidth', 2);
+                    else
+                        rectangle('Position', boundingBox, 'EdgeColor','b', 'LineWidth', 2);
+                    end
+                end
+            end
+            drawnow;
 
             hold off;
             nF = nF+1;
