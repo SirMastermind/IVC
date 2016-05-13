@@ -3,8 +3,8 @@ close all;
 clear;
 beep on;
 
-mode = 'movie'; % picture, movie
-show = 'speed'; % boxes, path, plot
+mode = 'picture'; % picture, movie
+show = 'boxes'; % boxes, path, plot
 
 nFrame = 3065;
 step = 5;
@@ -102,11 +102,14 @@ switch show
                     if (abs(boundingBox(3)/boundingBox(4) - 1) < 0.09)
                         continue;
                     end
-                    if (boundingBox(3)/boundingBox(4) > 1) %boundingBox(3) = width; boundingBox(4) = height. When width > height, it is a car
-                        rectangle('Position', boundingBox, 'EdgeColor','r', 'LineWidth', 2);
+                    if (objects(1) > 5000)
+                        color = 'g';
+                    elseif (boundingBox(3)/boundingBox(4) > 1) %boundingBox(3) = width; boundingBox(4) = height. When width > height, it is a car
+                        color = 'r';
                     else
-                        rectangle('Position', boundingBox, 'EdgeColor','b', 'LineWidth', 2);
+                        color = 'b';
                     end
+                    rectangle('Position', boundingBox, 'EdgeColor',color, 'LineWidth', 2); %r
                 end
             end
             drawnow;
