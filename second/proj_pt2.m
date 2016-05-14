@@ -6,6 +6,7 @@ beep on;
 mode = 'picture'; % picture, movie
 show = 'boxes'; % boxes, path, plot
 
+
 nFrame = 3065;
 step = 5;
 
@@ -14,7 +15,7 @@ speeds = zeros(1, nFrame, 5);
 nF = 1;
 nOD = 0;
 
-maxObjs = 1;
+maxObjs = 5;
 
 if(strcmp(mode,'picture'))
     path = 'DATASET1/TESTING/CAMERA1_JPEGS/';
@@ -220,8 +221,8 @@ switch show
 
             hold off;
             nF = nF+1;
-        end        
-    case 'plot'
+        end
+    case 'areas'
         numbers = zeros(size(d,3), maxObjs);
         for k = 1 : size(d,3)       
             % Find and label the different regions
@@ -244,4 +245,50 @@ switch show
         plot(numbers(:,5),'k-*');
         legend('1','2','3','4','5');
         hold off;
+    case 'positions'
+        centroids = zeros(maxObjs, 2, size(d,3));
+        for k = 1 : size(d,3)
+            [lb, num]= bwlabel(d(:, :, k));
+            s = regionprops(lb, 'centroid');
+            for i = 1 : numel(s)
+                centroids(i,:,k) = [s(i).Centroid(1), s(i).Centroid(2)];
+            end
+        end
+        beep;
+        figure, hold on;
+        for k = 1 : size(d,3)
+            for i = 1 : maxObjs
+                plot(k, centroids(1,1,k), 'b-')
+                plot(k, centroids(2,1,k), 'r--')
+                plot(k, centroids(3,1,k), 'g:')
+                plot(k, centroids(4,1,k), 'y--o')
+                plot(k, centroids(5,1,k), 'k-*'), ylabel('x')
+            end
+        end
+        legend('1','2','3','4','5');
+        hold off;
+        beep;
+        figure, hold on;
+        for k = 1 : size(d,3)
+            for i = 1 : maxObjs
+                plot(k, centroids(1,2,k), 'b-')
+                plot(k, centroids(2,2,k), 'r--')
+                plot(k, centroids(3,2,k), 'g:')
+                plot(k, centroids(4,2,k), 'y--o')
+                plot(k, centroids(5,2,k), 'k-*'), ylabel('x')
+            end
+        end
+        legend('1','2','3','4','5');
+        xlabel('time');
+        hold off;
+        
+%         figure; hold on;
+%         %plot(numbers);
+%         plot(numbers(:,1),'y-');
+%         plot(numbers(:,2),'r--');
+%         plot(numbers(:,3),'g:');
+%         plot(numbers(:,4),'b--o');
+%         plot(numbers(:,5),'k-*');
+%         legend('1','2','3','4','5');
+%         hold off;
 end
