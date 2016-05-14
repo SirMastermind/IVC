@@ -3,8 +3,8 @@ close all;
 clear;
 beep on;
 
-mode = 'picture'; % picture, movie
-show = 'boxes'; % boxes, path, plot
+mode = 'movie'; % picture, movie
+show = 'positions'; % boxes, path, plot
 
 
 nFrame = 3065;
@@ -38,6 +38,7 @@ else
     step = 5;
 
     vid3D = zeros([vid.Height vid.Width nFrame/step]);
+    d = zeros([576 768 nFrame/step]);
     k=1;
     for i = 1:step:nFrame
         img = read(vid,i);
@@ -249,46 +250,42 @@ switch show
         centroids = zeros(maxObjs, 2, size(d,3));
         for k = 1 : size(d,3)
             [lb, num]= bwlabel(d(:, :, k));
-            s = regionprops(lb, 'centroid');
-            for i = 1 : numel(s)
-                centroids(i,:,k) = [s(i).Centroid(1), s(i).Centroid(2)];
+            stats = regionprops(lb);
+            % Compute area for each region
+            objects = [stats.Area];
+            for i = 1 : size(lb,1) % For each lines
+                for j = 1 : size(lb,2) % For each column
+                    if lb(i,j) ~= 0 % If it's not background
+                        centroids(lb(i,j),1,k) = centroids(lb(i,j),1,k) + i; % Sum the lines
+                        centroids(lb(i,j),2,k) = centroids(lb(i,j),2,k) + j; % Sum the columns
+                    end
+                end
+            end
+            for i = 1 : length(objects) % For each object
+                centroids(i,1,k) = centroids(i,1,k)/objects(i); % lines' = sum(lines)/area
+                centroids(i,2,k) = centroids(i,2,k)/objects(i); % columns' = sum(columns)/area
             end
         end
         beep;
         figure, hold on;
         for k = 1 : size(d,3)
-            for i = 1 : maxObjs
-                plot(k, centroids(1,1,k), 'b-')
-                plot(k, centroids(2,1,k), 'r--')
-                plot(k, centroids(3,1,k), 'g:')
-                plot(k, centroids(4,1,k), 'y--o')
-                plot(k, centroids(5,1,k), 'k-*'), ylabel('x')
-            end
+            plot(k, centroids(1,1,k), 'b.',  'LineWidth', 2);
+            plot(k, centroids(2,1,k), 'ro', 'LineWidth', 2);
+            plot(k, centroids(3,1,k), 'g*', 'LineWidth', 2);
+            plot(k, centroids(4,1,k), 'y.', 'LineWidth', 2);
+            plot(k, centroids(5,1,k), 'ko', 'LineWidth', 2);
         end
         legend('1','2','3','4','5');
         hold off;
         beep;
         figure, hold on;
         for k = 1 : size(d,3)
-            for i = 1 : maxObjs
-                plot(k, centroids(1,2,k), 'b-')
-                plot(k, centroids(2,2,k), 'r--')
-                plot(k, centroids(3,2,k), 'g:')
-                plot(k, centroids(4,2,k), 'y--o')
-                plot(k, centroids(5,2,k), 'k-*'), ylabel('x')
-            end
+            plot(k, centroids(1,2,k), 'b.',  'LineWidth', 2);
+            plot(k, centroids(2,2,k), 'ro', 'LineWidth', 2);
+            plot(k, centroids(3,2,k), 'g*', 'LineWidth', 2);
+            plot(k, centroids(4,2,k), 'y.', 'LineWidth', 2);
+            plot(k, centroids(5,2,k), 'ko', 'LineWidth', 2);
         end
         legend('1','2','3','4','5');
-        xlabel('time');
         hold off;
-        
-%         figure; hold on;
-%         %plot(numbers);
-%         plot(numbers(:,1),'y-');
-%         plot(numbers(:,2),'r--');
-%         plot(numbers(:,3),'g:');
-%         plot(numbers(:,4),'b--o');
-%         plot(numbers(:,5),'k-*');
-%         legend('1','2','3','4','5');
-%         hold off;
 end
