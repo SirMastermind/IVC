@@ -4,7 +4,7 @@ clear;
 beep on;
 
 mode = 'picture'; % picture, movie
-show = 'boxes'; % boxes, path, plot, speed, areas, positions, centroidss
+show = 'positions'; % boxes, path, plot, speed, areas, positions
 
 nFrame = 3065;
 step = 5;
@@ -311,26 +311,6 @@ switch show
         end
         legend('1','2','3','4','5');
         hold off;
-    case 'centroids'
-        centroids = zeros(maxObjs, 2, size(d,3));
-        for k = 1 : size(d,3)
-            [lb, num]= bwlabel(d(:, :, k));
-            stats = regionprops(lb);
-            % Compute area for each region
-            objects = [stats.Area];
-            for i = 1 : size(lb,1) % For each lines
-                for j = 1 : size(lb,2) % For each column
-                    if lb(i,j) ~= 0 % If it's not background
-                        centroids(lb(i,j),1,k) = centroids(lb(i,j),1,k) + i; % Sum the lines
-                        centroids(lb(i,j),2,k) = centroids(lb(i,j),2,k) + j; % Sum the columns
-                    end
-                end
-            end
-            for i = 1 : length(objects) % For each object
-                centroids(i,1,k) = centroids(i,1,k)/objects(i); % lines' = sum(lines)/area
-                centroids(i,2,k) = centroids(i,2,k)/objects(i); % columns' = sum(columns)/area
-            end
-        end
         beep;
         figure, hold on;
         for k = 1 : size(d,3)
@@ -342,5 +322,4 @@ switch show
         end
         legend('1','2','3','4','5');
         hold off;
-end
 beep;
