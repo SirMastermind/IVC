@@ -4,7 +4,7 @@ clear;
 beep on;
 
 mode = 'movie'; % picture, movie
-show = 'positions'; % boxes, path, plot
+show = 'boxes'; % boxes, path, plot
 
 
 nFrame = 3065;
@@ -14,6 +14,7 @@ pathing = zeros(2, nFrame, 5);
 speeds = zeros(1, nFrame, 5);
 nF = 1;
 nOD = 0;
+merge = false;
 
 maxObjs = 5;
 
@@ -86,6 +87,7 @@ beep;
 
 switch show
     case 'boxes'
+        prev_num = 0;
         for k = 1 : size(d,3)
             % Find and label the different regions
             [lb, num]= bwlabel(d(:, :, k));
@@ -100,22 +102,44 @@ switch show
 
             if num > 0
                 for i = 1 : num
+                    split = false;
                     boundingBox = stats(i).BoundingBox;
                     if (abs(boundingBox(3)/boundingBox(4) - 1) < 0.09)
                         continue;
                     end
-                    if (objects(1) > 5000)
-                        color = 'g';
-                    elseif (boundingBox(3)/boundingBox(4) > 1) %boundingBox(3) = width; boundingBox(4) = height. When width > height, it is a car
+                    if (objects(1) > 5000 && num < prev_num)
+                        merge = true;
+                    elseif(merge && num > prev_num)
+                        merge = false;
+                        split = true;
+                    end
+                    if (boundingBox(3)/boundingBox(4) > 1) %boundingBox(3) = width; boundingBox(4) = height. When width > height, it is a car
                         color = 'r';
                     else
                         color = 'b';
                     end
-                    rectangle('Position', boundingBox, 'EdgeColor',color, 'LineWidth', 2); %r
+                    rectangle('Position', boundingBox, 'EdgeColor',color, 'LineWidth', 2);
+                    if(merge)
+                        str = 'MERGE';
+                        t = text(boundingBox(3), boundingBox(1),str);
+                        s = t.Color;
+                        t.Color = [1.0 0.0 0.0];
+                        s = t.FontSize;
+                        t.FontSize = 25;
+                    end
+                    if(split)
+                        str = 'SPLIT';
+                        t = text(boundingBox(3), boundingBox(1),str);
+                        s = t.Color;
+                        t.Color = [0.0 0.0 1.0];
+                        s = t.FontSize;
+                        t.FontSize = 25;
+                    end
                 end
             end
             drawnow;
             hold off;
+            prev_num =  num;
         end
     case 'path'
          for k = 1 : size(d,3)
