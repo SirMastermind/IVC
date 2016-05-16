@@ -111,10 +111,12 @@ switch show
                     end
                     if (objects(1) > 5000 && num < prev_num)
                         merge = true;
+                        disp('There was a merge.');
                     elseif(merge && num > prev_num)
                         merge = false;
                         split = true;
                         split_count = 50;
+                        disp('There was a split.');
                     end
                     if (boundingBox(3)/boundingBox(4) > 1) %boundingBox(3) = width; boundingBox(4) = height. When width > height, it is a car
                         color = 'r';
