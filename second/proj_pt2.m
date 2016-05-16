@@ -3,7 +3,7 @@ close all;
 clear;
 beep on;
 
-mode = 'picture'; % picture, movie
+mode = 'movie'; % picture, movie
 show = 'boxes'; % boxes, path, speed, areas, positions
 
 nFrame = 3065;
@@ -42,15 +42,29 @@ else
 
     vid3D = zeros([vid.Height vid.Width nFrame/step]);
     d = zeros([576 768 nFrame/step]);
-    k=1;
-    for i = 1:step:nFrame
+%     k=1;
+%     for i = 1:step:nFrame
+%         img = read(vid,i);
+%         vid3D(:,:,k)=rgb2gray(img);
+%         k = k+1;
+%     end
+    
+    img = read(vid,1);
+    bkg = zeros(vid.Height, vid.Width);
+    k = 1;
+    alfa = 0.05;
+
+    for i = 1 : step : nFrame
         img = read(vid,i);
-        vid3D(:,:,k)=rgb2gray(img);
-        k = k+1;
+        vid3D(:,:,k) = rgb2gray(img);
+        bkg = alfa * double(vid3D(:,:,k)) + (1-alfa) * double(bkg);
+        k = k + 1;
+        %figure;
+        %imshow(uint8(Bkg)); drawnow
     end
 end
 
-bkg = median(vid3D,3);
+%bkg = median(vid3D,3);
 %figure; imagesc(uint8(bkg)); colormap gray;
 
 ths = 29;
@@ -101,6 +115,7 @@ switch show
             objects = [stats.Area];
             
             imagesc(uint8(vid3D(:, :, k))); colormap gray; hold on;
+            axis off;
 
             if num > 0
                 for i = 1 : num
@@ -120,7 +135,7 @@ switch show
                     else
                         color = 'b';
                     end
-                    if (abs(boundingBox(3)/boundingBox(4) - 1) < 0.2)
+                    if (abs(boundingBox(3)/boundingBox(4) - 1) < 0.15)
                         color = 'g';
                     end
                     if (abs(boundingBox(3)/boundingBox(4) - 1) < 0.05)
@@ -182,6 +197,7 @@ switch show
             end
 
             imagesc(uint8(vid3D(:, :, k))); colormap gray; hold on;
+            axis off;
 
             for i = 1 : num
                 x_plot = [];
@@ -237,6 +253,7 @@ switch show
             end
 
             imagesc(uint8(vid3D(:, :, k))); colormap gray; hold on;
+            axis off;
             
             if num > 0
                 for i = 1 : num
