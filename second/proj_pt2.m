@@ -4,7 +4,7 @@ clear;
 beep on;
 
 mode = 'picture'; % picture, movie
-show = 'positions'; % boxes, path, plot, speed, areas, positions
+show = 'boxes'; % boxes, path, plot, speed, areas, positions
 
 nFrame = 3065;
 step = 5;
@@ -14,6 +14,9 @@ speeds = zeros(1, nFrame, 5);
 nF = 1;
 nOD = 0;
 merge = false;
+split = false;
+split_warning = false;
+split_count = 0;
 
 maxObjs = 5;
 
@@ -111,6 +114,7 @@ switch show
                     elseif(merge && num > prev_num)
                         merge = false;
                         split = true;
+                        split_count = 50;
                     end
                     if (boundingBox(3)/boundingBox(4) > 1) %boundingBox(3) = width; boundingBox(4) = height. When width > height, it is a car
                         color = 'r';
@@ -126,15 +130,19 @@ switch show
                         s = t.FontSize;
                         t.FontSize = 25;
                     end
-                    if(split)
+                    if(not(split_warning) && (split || split_count > 0))
                         str = 'SPLIT';
-                        t = text(boundingBox(3), boundingBox(1),str);
+                        t = text(boundingBox(2), boundingBox(1),str);
                         s = t.Color;
                         t.Color = [0.0 0.0 1.0];
                         s = t.FontSize;
                         t.FontSize = 25;
+                        split_count = split_count - 1;
+                        split = false;
+                        split_warning = true;
                     end
                 end
+                split_warning = false;
             end
             drawnow;
             hold off;
@@ -322,4 +330,5 @@ switch show
         end
         legend('1','2','3','4','5');
         hold off;
+end
 beep;
