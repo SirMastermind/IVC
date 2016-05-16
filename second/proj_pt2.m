@@ -4,7 +4,7 @@ clear;
 beep on;
 
 mode = 'picture'; % picture, movie
-show = 'boxes'; % boxes, path, plot, speed, areas, positions
+show = 'boxes'; % boxes, path, speed, areas, positions
 
 nFrame = 3065;
 step = 5;
@@ -106,9 +106,6 @@ switch show
                 for i = 1 : num
                     split = false;
                     boundingBox = stats(i).BoundingBox;
-                    if (abs(boundingBox(3)/boundingBox(4) - 1) < 0.09)
-                        continue;
-                    end
                     if (objects(1) > 5000 && num < prev_num)
                         merge = true;
                         disp('There was a merge.');
@@ -123,12 +120,18 @@ switch show
                     else
                         color = 'b';
                     end
+                    if (abs(boundingBox(3)/boundingBox(4) - 1) < 0.2)
+                        color = 'g';
+                    end
+                    if (abs(boundingBox(3)/boundingBox(4) - 1) < 0.05)
+                        continue;
+                    end
                     rectangle('Position', boundingBox, 'EdgeColor',color, 'LineWidth', 2);
                     if(merge)
                         str = 'MERGE';
                         t = text(boundingBox(3), boundingBox(1),str);
                         s = t.Color;
-                        t.Color = [1.0 0.0 0.0];
+                        t.Color = [1.0 1.0 0.0];
                         s = t.FontSize;
                         t.FontSize = 25;
                     end
@@ -136,7 +139,7 @@ switch show
                         str = 'SPLIT';
                         t = text(boundingBox(2), boundingBox(1),str);
                         s = t.Color;
-                        t.Color = [0.0 0.0 1.0];
+                        t.Color = [0.0 1.0 1.0];
                         s = t.FontSize;
                         t.FontSize = 25;
                         split_count = split_count - 1;
