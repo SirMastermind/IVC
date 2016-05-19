@@ -7,7 +7,7 @@ clear;
 beep on;
 
 % Show bar
-prompt = {'Enter source type (video or picture):','Enter mode (box, path or graph):'};
+prompt = {'Enter source type (video or picture):','Enter mode (box, path or plot):'};
 dlg_title = 'Input';
 num_lines = 1;
 defaultans = {'video','box'};
@@ -36,6 +36,8 @@ split_count = 0;
 nFrame = 3000;
 step = 1;
 prev_num = 0;
+
+maxObjs = 10;
 
 pathing = zeros(2, nFrame, 5);
 d = zeros([576 768 nFrame/step]);
@@ -82,6 +84,7 @@ end
 
 close(h);
 beep;
+
 if(strcmp(mode,'box'))
     figure('Name','Applying algorithm with box mode','NumberTitle','off'), hold on;
     for i = n_train : step : nFrame
@@ -126,7 +129,7 @@ if(strcmp(mode,'box'))
 %                 if (abs(boundingBox(3)/boundingBox(4) - 1) < 0.08)
 %                     continue;
 %                 end
-                if (boundingBox(3)/boundingBox(4) > 1) %boundingBox(3) = width; boundingBox(4) = height. When width > height, it is a car
+                if (boundingBox(3)/boundingBox(4) > 1.2) %boundingBox(3) = width; boundingBox(4) = height. When width > height, it is a car
                     t = text(boundingBox(1), boundingBox(2) - 12, 'Car');
                     t.Color = [1.0 0.0 0.0];
                     t.FontSize = 16;
@@ -240,5 +243,102 @@ elseif(strcmp(mode,'path'))
         nF = nF + 1;
         k = k + 1;
     end
+elseif(strcmp(mode,'plot'))
+    numbers = zeros(nFrame, maxObjs);
+    centroids = zeros(maxObjs, 2, nFrame);
+    h = waitbar(0, 'Getting the plots, please wait...');
+    index = 1;
+    for i = n_train : step : nFrame
+        if(strcmp(type,'picture'))
+            str1 = sprintf(str,path,i,'jpg');
+            img = imread(str1);
+        else
+            img = read(vid,i);
+        end
+
+        vid3D(:,:,k) = rgb2gray(img);
+
+        bw = (abs(vid3D(:,:,k) - bkg) > ths);
+        bw_final = bwareaopen(bw, 85);
+        se = strel('disk', 5);
+        bw_final = imclose(bw_final,se);
+        se = strel('disk', 5);
+        bw_final = imdilate(bw_final,se);
+        se = strel('disk', 5);
+        bw_final = imclose(bw_final,se);
+        bw_final = bwareaopen(bw_final, 150);
+        bw_image = (bw_final + previous_bw) > 0;
+        previous_bw = bw_final; 
+        
+        [lb, num]= bwlabel(bw_image);
+        stats = regionprops(lb);
+        objects = [stats.Area];
+        for a = 1 : size(lb,1) % For each lines
+            for j = 1 : size(lb,2) % For each column
+                if lb(a,j) ~= 0 % If it's not background
+                    centroids(lb(a,j),1,index) = centroids(lb(a,j),1,index) + a; % Sum the lines
+                    centroids(lb(a,j),2,index) = centroids(lb(a,j),2,index) + j; % Sum the columns
+                end
+            end
+        end
+        for a = 1 : length(objects) % For each object
+            centroids(a,1,index) = centroids(a,1,index)/objects(a); % lines' = sum(lines)/area
+            centroids(a,2,index) = centroids(a,2,index)/objects(a); % columns' = sum(columns)/area
+            numbers(index,a) = objects(a);
+        end
+
+        k = k + 1;
+        index = index + 1;
+        waitbar((i - n_train)/(nFrame - n_train), h);
+    end
+    close(h);
+    beep;
+    
+    figure('Name','Areas along time','NumberTitle','off');
+    hold on;
+    %plot(numbers);
+    plot(numbers(:,1),'y-');
+    plot(numbers(:,2),'r--');
+    plot(numbers(:,3),'g:');
+    plot(numbers(:,4),'b--o');
+    plot(numbers(:,5),'k-*');
+    legend('1','2','3','4','5');
+    hold off;
+    beep;
+    figure('Name','Centroids along time (x|y)','NumberTitle','off');
+    subplot(2, 1, 1), hold on;
+    for k = 1 : size(d,3)
+        plot(k, centroids(1,1,k), 'b.',  'LineWidth', 2);
+        plot(k, centroids(2,1,k), 'ro', 'LineWidth', 2);
+        plot(k, centroids(3,1,k), 'g*', 'LineWidth', 2);
+        plot(k, centroids(4,1,k), 'y.', 'LineWidth', 2);
+        plot(k, centroids(5,1,k), 'ko', 'LineWidth', 2);
+    end
+    legend('1','2','3','4','5');
+    hold off;
+    beep;
+    subplot(2, 1, 2), hold on;
+    for k = 1 : size(d,3)
+        plot(k, centroids(1,2,k), 'b.',  'LineWidth', 2);
+        plot(k, centroids(2,2,k), 'ro', 'LineWidth', 2);
+        plot(k, centroids(3,2,k), 'g*', 'LineWidth', 2);
+        plot(k, centroids(4,2,k), 'y.', 'LineWidth', 2);
+        plot(k, centroids(5,2,k), 'ko', 'LineWidth', 2);
+    end
+    legend('1','2','3','4','5');
+    hold off;
+    beep;
+    figure('Name','Centroids along time','NumberTitle','off');, hold on;
+    for k = 1 : size(d,3)
+        plot(centroids(1,2,k), centroids(1,1,k), 'b.',  'LineWidth', 2);
+        plot(centroids(2,2,k), centroids(2,1,k), 'ro', 'LineWidth', 2);
+        plot(centroids(3,2,k), centroids(3,1,k), 'g*', 'LineWidth', 2);
+        plot(centroids(4,2,k), centroids(4,1,k), 'y.', 'LineWidth', 2);
+        plot(centroids(5,2,k), centroids(5,1,k), 'ko', 'LineWidth', 2);
+    end
+    legend('1','2','3','4','5');
+    hold off;
+else
+    errordlg('Invalid mode','Mode Error');
 end
 beep;
