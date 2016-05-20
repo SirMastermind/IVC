@@ -21,6 +21,7 @@ k = 1;
 alfa = 0.05;
 ths = 29;
 n_train = 300;
+ahead = 0;
 
 nFrame = 3065;
 step = 5;
@@ -87,7 +88,7 @@ beep;
 
 if(strcmp(mode,'box'))
     figure('Name','Applying algorithm with box mode','NumberTitle','off'), hold on;
-    for i = n_train : step : nFrame
+    for i = n_train + ahead : step : nFrame
         if(strcmp(type,'picture'))
             str1 = sprintf(str2,path,i,'jpg');
             img = imread(str1);
@@ -98,16 +99,16 @@ if(strcmp(mode,'box'))
         vid3D(:,:,k) = rgb2gray(img);
 
         bw = (abs(vid3D(:,:,k) - bkg) > ths);
-        bw_final = bwareaopen(bw, 85);
-        se = strel('disk', 5);
-        bw_final = imclose(bw_final,se);
-        se = strel('disk', 5);
+        bw_final = bwareaopen(bw, 100);
+        bw_final = bwmorph(bw_final,'close');
+        se = strel('disk', 2);
         bw_final = imdilate(bw_final,se);
         se = strel('disk', 5);
         bw_final = imclose(bw_final,se);
-        bw_final = bwareaopen(bw_final, 150);
+        bw_final = bwareaopen(bw_final, 350);
         bw_image = (bw_final + previous_bw) > 0;
-        previous_bw = bw_final;
+        previous_bw = bw_final; 
+        
 
         [lb, num]= bwlabel(bw_image);
         stats = regionprops(lb);
@@ -119,22 +120,19 @@ if(strcmp(mode,'box'))
             for j = 1 : num
                 split = false;
                 boundingBox = stats(j).BoundingBox;
-                if (find(objects(:) > 4500) & num < prev_num)
+                if (find(objects(:) > 3400) & num < prev_num)
                     merge = true;
                 elseif(merge && num > prev_num)
                     merge = false;
                     split = true;
                     split_count = 15;
                 end
-%                 if (abs(boundingBox(3)/boundingBox(4) - 1) < 0.08)
-%                     continue;
-%                 end
-                if (boundingBox(3)/boundingBox(4) > 1.2) %boundingBox(3) = width; boundingBox(4) = height. When width > height, it is a car
+                if (boundingBox(3)/boundingBox(4) > 1.1) %boundingBox(3) = width; boundingBox(4) = height. When width > height, it is a car
                     t = text(boundingBox(1), boundingBox(2) - 12, 'Car');
                     t.Color = [1.0 0.0 0.0];
                     t.FontSize = 16;
                     color = 'r';
-                elseif (abs(boundingBox(3)/boundingBox(4) - 1) < 0.2)
+                elseif (abs(boundingBox(3)/boundingBox(4) - 1) < 0.3)
                     t = text(boundingBox(1), boundingBox(2) - 12, 'Other');
                     t.Color = [0.0 1.0 0.0];
                     t.FontSize = 16;
@@ -187,14 +185,13 @@ elseif(strcmp(mode,'path'))
         vid3D(:,:,k) = rgb2gray(img);
 
         bw = (abs(vid3D(:,:,k) - bkg) > ths);
-        bw_final = bwareaopen(bw, 85);
-        se = strel('disk', 5);
-        bw_final = imclose(bw_final,se);
-        se = strel('disk', 5);
+        bw_final = bwareaopen(bw, 100);
+        bw_final = bwmorph(bw_final,'close');
+        se = strel('disk', 2);
         bw_final = imdilate(bw_final,se);
         se = strel('disk', 5);
         bw_final = imclose(bw_final,se);
-        bw_final = bwareaopen(bw_final, 150);
+        bw_final = bwareaopen(bw_final, 350);
         bw_image = (bw_final + previous_bw) > 0;
         previous_bw = bw_final; 
         
@@ -246,7 +243,7 @@ elseif(strcmp(mode,'path'))
 elseif(strcmp(mode,'plot'))
     numbers = zeros(nFrame, maxObjs);
     centroids = zeros(maxObjs, 2, nFrame);
-    h = waitbar(0, 'Getting the plots, please wait...');
+    h = waitbar(0, 'Getting the values, please wait...');
     index = 1;
     for i = n_train : step : nFrame
         if(strcmp(type,'picture'))
@@ -259,31 +256,23 @@ elseif(strcmp(mode,'plot'))
         vid3D(:,:,k) = rgb2gray(img);
 
         bw = (abs(vid3D(:,:,k) - bkg) > ths);
-        bw_final = bwareaopen(bw, 85);
-        se = strel('disk', 5);
-        bw_final = imclose(bw_final,se);
-        se = strel('disk', 5);
+        bw_final = bwareaopen(bw, 100);
+        bw_final = bwmorph(bw_final,'close');
+        se = strel('disk', 2);
         bw_final = imdilate(bw_final,se);
         se = strel('disk', 5);
         bw_final = imclose(bw_final,se);
-        bw_final = bwareaopen(bw_final, 150);
+        bw_final = bwareaopen(bw_final, 350);
         bw_image = (bw_final + previous_bw) > 0;
-        previous_bw = bw_final; 
+        previous_bw = bw_final;
         
         [lb, num]= bwlabel(bw_image);
         stats = regionprops(lb);
         objects = [stats.Area];
-        for a = 1 : size(lb,1) % For each lines
-            for j = 1 : size(lb,2) % For each column
-                if lb(a,j) ~= 0 % If it's not background
-                    centroids(lb(a,j),1,index) = centroids(lb(a,j),1,index) + a; % Sum the lines
-                    centroids(lb(a,j),2,index) = centroids(lb(a,j),2,index) + j; % Sum the columns
-                end
-            end
-        end
+
         for a = 1 : length(objects) % For each object
-            centroids(a,1,index) = centroids(a,1,index)/objects(a); % lines' = sum(lines)/area
-            centroids(a,2,index) = centroids(a,2,index)/objects(a); % columns' = sum(columns)/area
+            centroids(a,1,index) = stats(a).Centroid(1);
+            centroids(a,2,index) = stats(a).Centroid(2);
             numbers(index,a) = objects(a);
         end
 
@@ -328,13 +317,14 @@ elseif(strcmp(mode,'plot'))
     legend('1','2','3','4','5');
     hold off;
     beep;
-    figure('Name','Centroids along time','NumberTitle','off');, hold on;
+    figure('Name','Centroids along time','NumberTitle','off'); hold on;
     for k = 1 : size(d,3)
-        plot(centroids(1,2,k), centroids(1,1,k), 'b.',  'LineWidth', 2);
-        plot(centroids(2,2,k), centroids(2,1,k), 'ro', 'LineWidth', 2);
-        plot(centroids(3,2,k), centroids(3,1,k), 'g*', 'LineWidth', 2);
-        plot(centroids(4,2,k), centroids(4,1,k), 'y.', 'LineWidth', 2);
-        plot(centroids(5,2,k), centroids(5,1,k), 'ko', 'LineWidth', 2);
+        plot(centroids(1,1,k), centroids(1,2,k), 'b.',  'LineWidth', 2);
+        plot(centroids(2,1,k), centroids(2,2,k), 'ro', 'LineWidth', 2);
+        plot(centroids(3,1,k), centroids(3,2,k), 'g*', 'LineWidth', 2);
+        plot(centroids(4,1,k), centroids(4,2,k), 'y.', 'LineWidth', 2);
+        plot(centroids(5,1,k), centroids(5,2,k), 'ko', 'LineWidth', 2);
+        
     end
     legend('1','2','3','4','5');
     hold off;
