@@ -17,11 +17,11 @@ type = answer(1);
 mode = answer(2);
 
 % Variables
-k = 1;
-alfa = 0.05;
-ths = 29;
-n_train = 300;
-ahead = 0;
+k = 1; % Differences index
+alfa = 0.05; % Background computation
+ths = 29; % Threshold for difference
+n_train = 300; % Amount of train frames
+ahead = 0; % Start in frame %d
 
 nFrame = 3065;
 step = 5;
@@ -239,8 +239,8 @@ elseif(strcmp(mode,'path'))
         k = k + 1;
     end
 elseif(strcmp(mode,'plot'))
-    numbers = zeros(nFrame, maxObjs);
-    centroids = zeros(maxObjs, 2, nFrame);
+    numbers = zeros(nFrame/step, maxObjs);
+    centroids = zeros(maxObjs, 2, nFrame/step);
     h = waitbar(0, 'Getting the values, please wait...');
     index = 1;
     for i = n_train : step : nFrame
@@ -283,7 +283,6 @@ elseif(strcmp(mode,'plot'))
     
     figure('Name','Areas along time','NumberTitle','off');
     hold on;
-    %plot(numbers);
     plot(numbers(:,1),'y-');
     plot(numbers(:,2),'r--');
     plot(numbers(:,3),'g:');
@@ -292,40 +291,48 @@ elseif(strcmp(mode,'plot'))
     legend('1','2','3','4','5');
     hold off;
     beep;
-    figure('Name','Centroids along time (x|y)','NumberTitle','off');
+    figure('Name','Centroids along time (x/y)','NumberTitle','off');
+    h = waitbar(0, 'Ploting x, please wait...');
     subplot(2, 1, 1), hold on;
-    for k = 1 : size(d,3)
+    for k = 1 : nFrame/step
         plot(k, centroids(1,1,k), 'b.',  'LineWidth', 2);
         plot(k, centroids(2,1,k), 'ro', 'LineWidth', 2);
         plot(k, centroids(3,1,k), 'g*', 'LineWidth', 2);
         plot(k, centroids(4,1,k), 'y.', 'LineWidth', 2);
         plot(k, centroids(5,1,k), 'ko', 'LineWidth', 2);
+        waitbar(k/(nFrame/step), h);
     end
     legend('1','2','3','4','5');
     hold off;
+    close(h);
     beep;
     subplot(2, 1, 2), hold on;
-    for k = 1 : size(d,3)
+    h = waitbar(0, 'Ploting y, please wait...');
+    for k = 1 : nFrame/step
         plot(k, centroids(1,2,k), 'b.',  'LineWidth', 2);
         plot(k, centroids(2,2,k), 'ro', 'LineWidth', 2);
         plot(k, centroids(3,2,k), 'g*', 'LineWidth', 2);
         plot(k, centroids(4,2,k), 'y.', 'LineWidth', 2);
         plot(k, centroids(5,2,k), 'ko', 'LineWidth', 2);
+        waitbar(k/(nFrame/step), h);
     end
     legend('1','2','3','4','5');
     hold off;
+    close(h);
     beep;
     figure('Name','Centroids along time','NumberTitle','off'); hold on;
-    for k = 1 : size(d,3)
+    h = waitbar(0, 'Plotting the centroids (x,y), please wait...');
+    for k = 1 : nFrame/step
         plot(centroids(1,1,k), centroids(1,2,k), 'b.',  'LineWidth', 2);
         plot(centroids(2,1,k), centroids(2,2,k), 'ro', 'LineWidth', 2);
         plot(centroids(3,1,k), centroids(3,2,k), 'g*', 'LineWidth', 2);
         plot(centroids(4,1,k), centroids(4,2,k), 'y.', 'LineWidth', 2);
         plot(centroids(5,1,k), centroids(5,2,k), 'ko', 'LineWidth', 2);
-        
+        waitbar(k/(nFrame/step), h);
     end
     legend('1','2','3','4','5');
     hold off;
+    close(h);
 else
     errordlg('Invalid mode','Mode Error');
 end
