@@ -34,8 +34,6 @@ split_warning = false;
 merge_warning = false;
 split_count = 0;
 
-nFrame = 3000;
-step = 1;
 prev_num = 0;
 
 maxObjs = 10;
