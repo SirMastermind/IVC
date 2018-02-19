@@ -21,9 +21,9 @@ k = 1; % Differences index
 alfa = 0.05; % Background computation
 ths = 29; % Threshold for difference
 n_train = 300; % Amount of train frames
-ahead = 0; % Start in frame %d
+ahead = 600; % Start in frame %d
 
-nFrame = 3065;
+nFrame = 3000;
 step = 5;
 
 nF = 1;
@@ -66,7 +66,7 @@ if(strcmp(type,'picture')) % If the user wants picture type
    for i = 1 : step : n_train
         str1 = sprintf(str2,path,i,'jpg');
         img = imread(str1);
-        vid3D(:,:,k) = rgb2gray(img);
+        vid3D(:,:,k) = img(:,:,1);
         bkg = alfa * double(vid3D(:,:,k)) + (1-alfa) * double(bkg);
         waitbar(i/n_train, h); 
         k = k + 1;
@@ -74,7 +74,7 @@ if(strcmp(type,'picture')) % If the user wants picture type
 else
     for i = 1 : step : n_train
         img = read(vid,i);
-        vid3D(:,:,k) = rgb2gray(img);
+        vid3D(:,:,k) = img(:,:,1);
         bkg = alfa * double(vid3D(:,:,k)) + (1-alfa) * double(bkg);
         waitbar(i/n_train, h); 
         k = k + 1;
@@ -94,7 +94,7 @@ if(strcmp(mode,'box'))
             img = read(vid,i);
         end
 
-        vid3D(:,:,k) = rgb2gray(img);
+        vid3D(:,:,k) = img(:,:,1);
 
         bw = (abs(vid3D(:,:,k) - bkg) > ths);
         bw_final = bwareaopen(bw, 100);
@@ -103,7 +103,7 @@ if(strcmp(mode,'box'))
         bw_final = imdilate(bw_final,se);
         se = strel('disk', 5);
         bw_final = imclose(bw_final,se);
-        bw_final = bwareaopen(bw_final, 350);
+        bw_final = bwareaopen(bw_final, 200);
         bw_image = (bw_final + previous_bw) > 0;
         previous_bw = bw_final; 
         
@@ -174,13 +174,13 @@ elseif(strcmp(mode,'path'))
     %figure;
     for i = n_train : step : nFrame
         if(strcmp(type,'picture'))
-            str1 = sprintf(str,path,i,'jpg');
+            str1 = sprintf(str2,path,i,'jpg');
             img = imread(str1);
         else
             img = read(vid,i);
         end
 
-        vid3D(:,:,k) = rgb2gray(img);
+        vid3D(:,:,k) = img(:,:,1);
 
         bw = (abs(vid3D(:,:,k) - bkg) > ths);
         bw_final = bwareaopen(bw, 100);
@@ -189,7 +189,7 @@ elseif(strcmp(mode,'path'))
         bw_final = imdilate(bw_final,se);
         se = strel('disk', 5);
         bw_final = imclose(bw_final,se);
-        bw_final = bwareaopen(bw_final, 350);
+        bw_final = bwareaopen(bw_final, 200);
         bw_image = (bw_final + previous_bw) > 0;
         previous_bw = bw_final; 
         
@@ -198,27 +198,12 @@ elseif(strcmp(mode,'path'))
         objects = [stats.Area];
         
         nOD = max(nOD, length(objects));
-        
-        centroids = zeros(length(objects), 2); % To save (sum of lines, sum of columns) for each label
-        for a = 1 : size(lb,1) % For each lines
-            for j = 1 : size(lb,2) % For each column
-                if lb(a,j) ~= 0 % If it's not background
-                    centroids(lb(a,j),1) = centroids(lb(a,j),1) + a; % Sum the lines
-                    centroids(lb(a,j),2) = centroids(lb(a,j),2) + j; % Sum the columns
-                end
-            end
+        for a = 1 : length(objects) % For each object
+            pathing(2, nF, a) = stats(a).Centroid(1);
+            pathing(1, nF, a) = stats(a).Centroid(2);
         end
 
-        for l = 1 : length(objects) % For each object
-            centroids(l,1) = centroids(l,1)/objects(l); % lines' = sum(lines)/area
-            centroids(l,2) = centroids(l,2)/objects(l); % columns' = sum(columns)/area
-            pathing(1, nF, l) = centroids(l,1);
-            pathing(2, nF, l) = centroids(l,2);
-        end
-
-        %imshow(img); hold on;
-        imagesc(uint8(vid3D(:, :, k))); colormap gray; hold on;
-        axis off;
+        imshow(img); hold on;
 
         for a = 1 : num
             x_plot = [];
@@ -227,11 +212,7 @@ elseif(strcmp(mode,'path'))
                 x_plot = [ x_plot pathing(1, j, a) ];
                 y_plot = [ y_plot pathing(2, j, a) ];
             end
-            if(stats(a).BoundingBox(3) / stats(a).BoundingBox(4) > 1)
-                plot(y_plot, x_plot, 'r.', 'MarkerSize', 5);
-            else
-                plot(y_plot, x_plot, 'b.', 'MarkerSize', 5);
-            end
+            plot(y_plot, x_plot, 'y.', 'MarkerSize', 5);
             drawnow;
         end
         hold off;
@@ -239,7 +220,7 @@ elseif(strcmp(mode,'path'))
         k = k + 1;
     end
 elseif(strcmp(mode,'plot'))
-    numbers = zeros(nFrame/step, maxObjs);
+ numbers = zeros(nFrame/step, maxObjs);
     centroids = zeros(maxObjs, 2, nFrame/step);
     h = waitbar(0, 'Getting the values, please wait...');
     index = 1;
@@ -251,8 +232,8 @@ elseif(strcmp(mode,'plot'))
             img = read(vid,i);
         end
 
-        vid3D(:,:,k) = rgb2gray(img);
-
+        vid3D(:,:,k) = img(:,:,1);
+        
         bw = (abs(vid3D(:,:,k) - bkg) > ths);
         bw_final = bwareaopen(bw, 100);
         bw_final = bwmorph(bw_final,'close');
@@ -260,7 +241,7 @@ elseif(strcmp(mode,'plot'))
         bw_final = imdilate(bw_final,se);
         se = strel('disk', 5);
         bw_final = imclose(bw_final,se);
-        bw_final = bwareaopen(bw_final, 350);
+        bw_final = bwareaopen(bw_final, 200);
         bw_image = (bw_final + previous_bw) > 0;
         previous_bw = bw_final;
         
@@ -281,18 +262,18 @@ elseif(strcmp(mode,'plot'))
     close(h);
     beep;
     
-    figure('Name','Areas along time','NumberTitle','off');
-    hold on;
-    plot(numbers(:,1),'y-');
-    plot(numbers(:,2),'r--');
-    plot(numbers(:,3),'g:');
-    plot(numbers(:,4),'b--o');
-    plot(numbers(:,5),'k-*');
-    legend('1','2','3','4','5');
-    hold off;
-    beep;
-    figure('Name','Centroids along time (x/y)','NumberTitle','off');
+%     figure('Name','Areas along time','NumberTitle','off');
+%     hold on;
+%     plot(numbers(:,1),'y-');
+%     plot(numbers(:,2),'r--');
+%     plot(numbers(:,3),'g:');
+%     plot(numbers(:,4),'b--o');
+%     plot(numbers(:,5),'k-*');
+%     legend('1','2','3','4','5');
+%     hold off;
+%     beep;
     h = waitbar(0, 'Ploting x, please wait...');
+    figure('Name','Centroids along time (x/y)','NumberTitle','off'); hold on;
     subplot(2, 1, 1), hold on;
     for k = 1 : nFrame/step
         plot(k, centroids(1,1,k), 'b.',  'LineWidth', 2);
@@ -304,10 +285,10 @@ elseif(strcmp(mode,'plot'))
     end
     legend('1','2','3','4','5');
     hold off;
-    close(h);
-    beep;
-    subplot(2, 1, 2), hold on;
     h = waitbar(0, 'Ploting y, please wait...');
+    beep;
+    figure('Name','Centroids along time (x/y)','NumberTitle','off'); hold on;
+    subplot(2, 1, 2), hold on;
     for k = 1 : nFrame/step
         plot(k, centroids(1,2,k), 'b.',  'LineWidth', 2);
         plot(k, centroids(2,2,k), 'ro', 'LineWidth', 2);
